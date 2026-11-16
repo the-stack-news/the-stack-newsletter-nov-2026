@@ -1,0 +1,3334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stack — November 2026 | Issue 4</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  --blue-2:#D1EFFF;
+  --blue-4:#89D1FF;
+  --blue-6:#1B90FF;
+  --blue-7:#0070F2;
+  --blue-10:#002A86;
+  --blue-11:#00144A;
+
+  --indigo-2:#E2D8FF;
+  --indigo-4:#B894FF;
+  --indigo-6:#7858FF;
+  --indigo-7:#5D36FF;
+  --indigo-10:#1C0C6E;
+  --indigo-wash:#F3F0FF;
+
+  --teal-2:#C2FCEE;
+  --teal-4:#2CE0BF;
+  --teal-6:#049F9A;
+  --teal-7:#07838F;
+  --teal-10:#02414C;
+  --teal-wash:#EFFBF9;
+
+  --green-2:#EBF5CB;
+  --green-4:#97DD40;
+  --green-6:#36A41D;
+  --green-7:#188918;
+  --green-10:#164323;
+  --green-wash:#F4FAE9;
+
+  --pink-2:#FFDCF3;
+  --pink-6:#F31DED;
+  --pink-7:#CC00DC;
+  --pink-10:#510080;
+  --pink-wash:#FBEFFB;
+
+  --mango-2:#FFF3B8;
+  --mango-4:#FFC933;
+  --mango-6:#E76500;
+  --mango-7:#C35500;
+  --mango-wash:#FFFAE8;
+
+  --grey-2:#EAECEE;
+  --grey-4:#A9B4BE;
+  --grey-6:#5B738B;
+  --grey-7:#475E75;
+  --grey-10:#1A2733;
+  --grey-11:#12171C;
+
+  --ink:#12171C;
+  --ink-2:#475E75;
+  --ink-3:#5B738B;
+
+  --line:#E0E3E8;
+  --bg:#F5F6F8;
+  --card:#FFFFFF;
+
+  --r:6px;
+  --r-lg:12px;
+  --r-xl:16px;
+
+  --shadow-card:0 1px 3px rgba(18,23,28,.07),0 4px 16px rgba(0,42,134,.07);
+  --shadow-hover:0 6px 28px rgba(0,42,134,.16),0 2px 8px rgba(0,0,0,.06);
+  --shadow-dark:0 8px 40px rgba(0,0,0,.45);
+
+  --font:'Segoe UI',Arial,Helvetica,system-ui,sans-serif;
+  --wrap:1200px;
+  --ts:clamp(1.55rem,2.4vw,2rem);
+  --tc:1.18rem;
+  --nav-h:44px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:#fff;
+  color:var(--ink);
+  font-size:1rem;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--blue-7);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;display:block}
+ul{list-style:none}
+
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
+.wrap{
+  max-width:var(--wrap);
+  margin-inline:auto;
+  padding-inline:clamp(1rem,3vw,2rem);
+}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem}
+.flex{display:flex;align-items:center}
+.flex-gap{display:flex;align-items:center;gap:.75rem}
+.flex-wrap{display:flex;flex-wrap:wrap;gap:.75rem}
+
+/* ============================================================
+   SECTION WRAPPER
+   ============================================================ */
+.section{padding-block:clamp(2.25rem,4vw,3.5rem)}
+.section-header{margin-bottom:1.75rem}
+.section-label{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  font-size:.68rem;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:.5rem;
+}
+.section-label::before{
+  content:'—';
+  color:var(--blue-6);
+  font-weight:400;
+  letter-spacing:0;
+}
+.section-title{
+  font-size:var(--ts);
+  font-weight:800;
+  color:var(--ink);
+  line-height:1.18;
+  letter-spacing:-.025em;
+}
+.section-subtitle{
+  font-size:1rem;
+  color:var(--ink-2);
+  margin-top:.5rem;
+  max-width:62ch;
+  line-height:1.65;
+}
+
+/* ============================================================
+   SECTION DIVIDERS — bold horizontal rule between sections
+   ============================================================ */
+.section-divider{
+  height:4px;
+  border:none;
+  margin:0;
+}
+.section-divider.indigo{background:linear-gradient(90deg,var(--indigo-6) 0%,var(--indigo-4) 50%,transparent 100%)}
+.section-divider.teal  {background:linear-gradient(90deg,var(--teal-6) 0%,var(--teal-4) 50%,transparent 100%)}
+.section-divider.blue  {background:linear-gradient(90deg,var(--blue-7) 0%,var(--blue-4) 50%,transparent 100%)}
+
+/* ============================================================
+   TAG PILLS
+   ============================================================ */
+/* Usage: <span class="tag tp-blue">Label</span> */
+.tag{
+  display:inline-flex;
+  align-items:center;
+  font-size:.69rem;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  padding:.25em .75em;
+  border-radius:99px;
+  white-space:nowrap;
+  line-height:1.2;
+}
+/* Light pastel versions (default — used on light backgrounds) */
+.tp-blue   {background:var(--blue-2);color:var(--blue-10)}
+.tp-indigo {background:var(--indigo-2);color:var(--indigo-10)}
+.tp-teal   {background:var(--teal-2);color:var(--teal-10)}
+.tp-green  {background:var(--green-2);color:var(--green-10)}
+.tp-pink   {background:var(--pink-2);color:var(--pink-10)}
+.tp-gold   {background:var(--mango-2);color:var(--mango-7)}
+.tp-grey   {background:var(--grey-2);color:var(--grey-10)}
+/* Solid versions — used on gold ticker bar */
+.tp-blue-solid  {background:#0070F2;color:#fff}
+.tp-indigo-solid{background:#5D36FF;color:#fff}
+.tp-teal-solid  {background:#049F9A;color:#fff}
+.tp-green-solid {background:#188918;color:#fff}
+.tp-pink-solid  {background:#CC00DC;color:#fff}
+.tp-gold-solid  {background:#fff;color:#C35500;font-weight:800}
+.tp-orange-solid{background:#E76500;color:#fff}
+
+/* ============================================================
+   CTA BUTTONS
+   ============================================================ */
+/* Usage: <a href="#" class="btn btn-primary">Action Label</a> */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  font-size:.875rem;
+  font-weight:600;
+  padding:.55em 1.3em;
+  border-radius:99px;
+  transition:background .18s,box-shadow .2s,transform .13s;
+  cursor:pointer;
+  border:none;
+  text-decoration:none;
+  white-space:nowrap;
+  line-height:1.3;
+}
+.btn:hover{text-decoration:none;transform:translateY(-1px)}
+.btn-primary{background:var(--blue-7);color:#fff}
+.btn-primary:hover{background:#0060d9;box-shadow:0 4px 18px rgba(0,112,242,.35)}
+.btn-secondary{background:transparent;color:var(--blue-7);border:1.5px solid var(--blue-7)}
+.btn-secondary:hover{background:var(--blue-2);border-color:var(--blue-6)}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1.5px solid var(--line)}
+.btn-ghost:hover{background:var(--grey-2);border-color:var(--grey-4)}
+.btn-gold{background:var(--mango-4);color:#1a0f00;font-weight:700}
+.btn-gold:hover{background:#ffda5c;box-shadow:0 4px 18px rgba(255,201,51,.4)}
+.btn-white{background:#fff;color:var(--blue-7);font-weight:700}
+.btn-white:hover{background:var(--blue-2)}
+.btn-white-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.55)}
+.btn-white-outline:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.8)}
+.btn-teal{background:var(--teal-6);color:#fff;font-weight:700}
+.btn-teal:hover{background:var(--teal-7);box-shadow:0 4px 14px rgba(4,159,154,.35)}
+.btn-indigo{background:var(--indigo-7);color:#fff;font-weight:700}
+.btn-indigo:hover{background:var(--indigo-10)}
+.btn-outline-indigo{background:transparent;color:var(--indigo-7);border:1.5px solid var(--indigo-7)}
+.btn-outline-indigo:hover{background:var(--indigo-wash)}
+.btn-sm{font-size:.79rem;padding:.4em 1em}
+.btn-lg{font-size:1rem;padding:.68em 1.6em}
+.btn-arrow::after{content:' ›';transition:transform .15s}
+.btn-arrow:hover::after{transform:translateX(3px)}
+
+/* ============================================================
+   CARD BASE
+   ============================================================ */
+.card{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+  transition:box-shadow .22s,transform .22s;
+}
+.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.card-body{padding:1.5rem}
+.card-footer{padding:1rem 1.5rem;border-top:1px solid var(--line)}
+
+/* ============================================================
+   SECTION 1 — MASTHEAD / HEADER
+   White background. SAP logo top-left. "The Stack" large + centered.
+   Sub-label below title. Edition date/label right-aligned.
+   ============================================================ */
+.masthead{
+  background:#ffffff;
+  border-bottom:1px solid #E0E3E8;
+  padding-block:1.1rem 1.1rem;
+  position:relative;
+}
+.masthead-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:80px;
+  position:relative;
+}
+/* SAP logo — corporate masthead sizing */
+.masthead-sap{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  min-width:180px;
+}
+.masthead-sap-logo{
+  display:block;
+  width:120px; /* ~2.3× previous 52px; preserves ~4:3 aspect of the SAP parallelogram mark */
+  height:auto;
+  flex-shrink:0;
+}
+/* Centered title block — absolute so it never competes with left/right */
+.masthead-center{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.masthead-title{
+  font-size:1.75rem;
+  font-weight:800;
+  color:#12171C;
+  letter-spacing:-.04em;
+  line-height:1;
+  pointer-events:auto;
+}
+.masthead-sub{
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:#5B738B;
+  margin-top:.35rem;
+}
+/* Edition info — far right */
+.masthead-edition{
+  text-align:right;
+  flex-shrink:0;
+  min-width:180px;
+}
+.masthead-edition-date{
+  font-size:.82rem;
+  font-weight:700;
+  color:#12171C;
+  line-height:1.4;
+  letter-spacing:.01em;
+}
+.masthead-edition-label{
+  font-size:.72rem;
+  color:#5B738B;
+  letter-spacing:.04em;
+  line-height:1.4;
+}
+
+/* ============================================================
+   SECTION 2 — TICKER BAR
+   Very dark navy. White text. Small rectangular coloured pill tags.
+   Continuous smooth scroll — financial news wire aesthetic.
+   ============================================================ */
+.ticker-wrap{
+  background:#07173d;
+  overflow:hidden;
+  height:34px;
+  display:flex;
+  align-items:center;
+  position:relative;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+/* Left/right fade masks */
+.ticker-wrap::before,
+.ticker-wrap::after{
+  content:'';
+  position:absolute;top:0;bottom:0;
+  width:56px;z-index:2;pointer-events:none;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(to right,#07173d 60%,transparent)}
+.ticker-wrap::after {right:0;background:linear-gradient(to left,#07173d 60%,transparent)}
+.ticker-track{
+  display:flex;
+  align-items:center;
+  gap:0;
+  width:max-content;
+  /* GPU-friendly transform-only animation */
+  animation:ticker-scroll 55s linear infinite;
+  will-change:transform;
+}
+.ticker-wrap:hover .ticker-track{animation-play-state:paused}
+/* Each item: [pill][separator-dot][text] */
+.ticker-item{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  padding-inline:1.4rem;
+  white-space:nowrap;
+  font-size:.76rem;
+  font-weight:500;
+  color:rgba(255,255,255,.82);
+  letter-spacing:.01em;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.ticker-item:last-child{border-right:none}
+/* Separator dot between items when no border is used */
+.ticker-dot{display:none} /* hidden — using border-right instead */
+/* Pill tags — rectangular, bold, all-caps, coloured */
+.tag.tp-ticker-stack  {background:#F5A100;color:#000;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+.tag.tp-ticker-lab    {background:#5D36FF;color:#fff;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+.tag.tp-ticker-events {background:#007735;color:#fff;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+.tag.tp-ticker-brief  {background:#0070F2;color:#fff;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+.tag.tp-ticker-ux     {background:#049F9A;color:#fff;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+.tag.tp-ticker-prog   {background:#e87722;color:#fff;border-radius:3px;padding:.18em .5em;font-size:.65rem;font-weight:800;letter-spacing:.07em}
+@keyframes ticker-scroll{
+  0%  {transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
+/* ============================================================
+   SECTION 3 — STICKY NAVIGATION
+   White. Thin bottom border. Links centered. Active = SAP blue underline.
+   ============================================================ */
+.site-nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:#ffffff;
+  border-bottom:2px solid #E0E3E8;
+  height:40px;
+  box-shadow:none;
+}
+.nav-inner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  gap:0;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-link{
+  display:flex;
+  align-items:center;
+  height:100%;
+  padding-inline:.95rem;
+  font-size:.8rem;
+  font-weight:500;
+  color:#475E75;
+  /* underline sits on the component bottom border */
+  border-bottom:2.5px solid transparent;
+  margin-bottom:-2px; /* overlap the container border so active line replaces it */
+  white-space:nowrap;
+  transition:color .15s,border-color .15s;
+  text-decoration:none;
+  letter-spacing:.005em;
+}
+.nav-link:hover{color:#0070F2;text-decoration:none}
+.nav-link.active{color:#0070F2;border-bottom-color:#0070F2;font-weight:600}
+/* Issue label hidden in nav — shown in masthead instead */
+.nav-issue{display:none}
+
+/* ============================================================
+   SECTION 4 — TOP NEWS HERO
+   Plain white section with large title + supporting visual card
+   ============================================================ */
+#top-news{
+  background:#fff;
+  padding-block:2.5rem 2rem;
+  border-bottom:1px solid var(--line);
+}
+.hero-wrap{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:2.5rem;
+  align-items:center;
+}
+.hero-eyebrow{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  margin-bottom:1rem;
+}
+.hero-date-chip{
+  font-size:.74rem;
+  color:var(--ink-3);
+  background:var(--bg);
+  border:1px solid var(--line);
+  padding:.2em .7em;
+  border-radius:99px;
+  font-weight:500;
+}
+.hero-title{
+  font-size:clamp(1.75rem,3.2vw,2.6rem);
+  font-weight:800;
+  line-height:1.13;
+  letter-spacing:-.03em;
+  color:var(--ink);
+  margin-bottom:1rem;
+}
+.hero-summary{
+  font-size:1.02rem;
+  color:var(--ink-2);
+  line-height:1.72;
+  max-width:54ch;
+  margin-bottom:1.75rem;
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.65rem;align-items:center}
+/* Hero visual panel — dark feature card */
+.hero-visual{
+  background:linear-gradient(145deg,var(--blue-11) 0%,#001878 45%,var(--blue-10) 100%);
+  border-radius:var(--r-xl);
+  min-height:280px;
+  padding:1.75rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow-dark);
+}
+.hero-visual::before{
+  content:'';
+  position:absolute;right:-40px;top:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(27,144,255,.22) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-visual-top{position:relative;z-index:1}
+.hero-visual-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:1.1rem}
+.hero-visual-logo-icon{
+  width:26px;height:26px;background:rgba(255,255,255,.12);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-visual-logo-text{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;}
+.hero-visual-kicker{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-4);margin-bottom:.45rem;}
+.hero-visual-headline{font-size:1rem;font-weight:700;color:#fff;line-height:1.35;max-width:22ch;}
+.hero-visual-bottom{position:relative;z-index:1}
+.hero-visual-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.35rem;}
+.hero-visual-stat{font-size:3rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-.03em;}
+.hero-visual-stat sub{font-size:1.3rem;font-weight:700;vertical-align:middle;color:var(--blue-4);}
+.hero-visual-desc{color:var(--blue-4);font-size:.86rem;margin-top:.3rem;font-weight:500;}
+
+/* ============================================================
+   SECTION 5 — SUPPORTING STORIES
+   Three cards on light grey band beneath hero
+   ============================================================ */
+.stories-band{
+  background:var(--bg);
+  padding-block:2rem 2.5rem;
+  border-bottom:1px solid var(--line);
+}
+.story-card{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card);
+  border:1px solid rgba(224,227,232,.8);
+  overflow:hidden;
+  transition:box-shadow .22s,transform .22s,border-color .22s;
+  display:flex;flex-direction:column;
+}
+.story-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px);border-color:var(--blue-4);}
+.story-card-accent{height:3px}
+.story-card-accent.blue  {background:linear-gradient(90deg,var(--blue-7),var(--blue-4))}
+.story-card-accent.indigo{background:linear-gradient(90deg,var(--indigo-6),var(--indigo-4))}
+.story-card-accent.teal  {background:linear-gradient(90deg,var(--teal-6),var(--teal-4))}
+.story-card-accent.green {background:linear-gradient(90deg,var(--green-6),var(--green-4))}
+.story-card-accent.gold  {background:linear-gradient(90deg,var(--mango-6),var(--mango-4))}
+.story-card-body{padding:1.3rem 1.4rem .9rem;flex:1}
+.story-card-eyebrow{margin-bottom:.6rem}
+.story-card-title{font-size:1rem;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:.55rem;letter-spacing:-.01em;}
+.story-card-summary{font-size:.865rem;color:var(--ink-2);line-height:1.63;}
+.story-card-footer{padding:.85rem 1.4rem;border-top:1px solid var(--line);background:rgba(245,246,248,.6);}
+
+/* ============================================================
+   SECTION 6 — CODE CAMP / FEATURE HERO
+   Deep indigo-purple with dot matrix, gold resource buttons
+   ============================================================ */
+.feature-section{
+  background:linear-gradient(135deg,#1E0A5C 0%,#2D1B78 45%,#1A0A50 100%);
+  position:relative;
+  overflow:hidden;
+}
+/* Dot matrix pattern */
+.feature-section::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1px);
+  background-size:20px 20px;
+  pointer-events:none;
+}
+/* Ambient glow */
+.feature-section::after{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 55% 70% at 30% 50%,rgba(93,54,255,.18) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 60% at 85% 30%,rgba(184,148,255,.1) 0%,transparent 60%);
+  pointer-events:none;
+}
+.feature-inner{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:3rem;
+  align-items:start;
+  padding-block:3rem;
+  position:relative;z-index:1;
+}
+/* SAP Signavio badge top-left */
+.feature-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:6px;
+  padding:.3em .75em;
+  margin-bottom:1rem;
+}
+.feature-brand-icon{
+  width:18px;height:18px;
+  background:#0070F2;
+  border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+}
+.feature-brand-name{
+  font-size:.72rem;font-weight:700;
+  color:rgba(255,255,255,.65);
+  letter-spacing:.04em;
+}
+/* "Code Camp" big title */
+.feature-headline{
+  font-size:clamp(2.5rem,5vw,3.8rem);
+  font-weight:900;
+  color:#fff;
+  line-height:1;
+  letter-spacing:-.04em;
+  margin-bottom:.6rem;
+}
+/* Date + venue line */
+.feature-dateline{
+  font-size:.9rem;
+  color:rgba(255,255,255,.65);
+  margin-bottom:1rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.feature-dateline-sep{color:rgba(255,255,255,.3)}
+/* Gold tagline pill */
+.feature-tagline{
+  display:inline-flex;
+  background:var(--mango-4);
+  color:#1a0f00;
+  font-size:.78rem;
+  font-weight:700;
+  padding:.35em 1em;
+  border-radius:99px;
+  margin-bottom:1.75rem;
+  letter-spacing:.01em;
+}
+/* Sub-session block */
+.feature-session{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r-lg);
+  padding:1.25rem 1.4rem;
+  margin-bottom:1.5rem;
+}
+.feature-session-title{
+  font-size:1.05rem;
+  font-weight:700;
+  color:#fff;
+  margin-bottom:.5rem;
+  line-height:1.3;
+}
+.feature-session-body{
+  font-size:.875rem;
+  color:rgba(255,255,255,.65);
+  line-height:1.65;
+  margin-bottom:.75rem;
+}
+.feature-session-note{
+  font-size:.8rem;
+  color:rgba(255,255,255,.45);
+  font-style:italic;
+}
+/* Feature resource panel (right column) */
+.feature-panel{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r-xl);
+  padding:1.5rem 1.25rem;
+}
+.feature-panel-label{
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+  margin-bottom:1.1rem;
+  padding-bottom:.75rem;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+/* Gold pill resource buttons — stacked */
+.feature-resource-btn{
+  display:block;
+  background:var(--mango-4);
+  color:#12171C;
+  font-weight:700;
+  font-size:.84rem;
+  padding:.65em 1.1em;
+  border-radius:99px;
+  text-align:center;
+  text-decoration:none;
+  margin-bottom:.65rem;
+  transition:background .18s,transform .12s;
+  line-height:1.3;
+}
+.feature-resource-btn:last-child{margin-bottom:0}
+.feature-resource-btn:hover{background:#ffda5c;transform:translateY(-1px);text-decoration:none;}
+
+/* Legacy feature elements (keep for backwards compat) */
+.feature-badge{display:none}
+.feature-title{display:none}
+.feature-summary{display:none}
+.feature-highlight{display:none}
+.feature-actions{display:none}
+.feature-resources{display:none}
+
+/* ============================================================
+   SECTION 7 — AI & ENGINEERING
+   White/light bg, full-width visual card, row of outline CTAs
+   ============================================================ */
+#ai-engineering{
+  background:#fff;
+  border-top:1px solid var(--line);
+}
+#ai-engineering .section-label::before{color:var(--teal-6)}
+.ai-content-stack{display:flex;flex-direction:column;gap:1.5rem}
+.ai-intro{
+  font-size:1rem;
+  color:var(--ink-2);
+  line-height:1.75;
+  max-width:70ch;
+}
+/* Full-width teal visual card */
+.ai-visual{
+  background:linear-gradient(135deg,#047A80 0%,#05A89E 40%,#2CBFBE 100%);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+  padding:0;
+}
+.ai-visual svg{display:block;width:100%;height:auto;}
+/* Row of outline CTA buttons */
+.ai-cta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.65rem;
+  align-items:center;
+}
+.ai-cta-btn{
+  display:inline-flex;
+  align-items:center;
+  font-size:.82rem;
+  font-weight:600;
+  padding:.5em 1.2em;
+  border-radius:99px;
+  border:1.5px solid var(--blue-7);
+  color:var(--blue-7);
+  background:transparent;
+  text-decoration:none;
+  transition:background .18s,color .18s;
+  white-space:nowrap;
+}
+.ai-cta-btn:hover{background:var(--blue-2);text-decoration:none;}
+.ai-cta-btn.teal{border-color:var(--teal-6);color:var(--teal-7);}
+.ai-cta-btn.teal:hover{background:var(--teal-2);}
+.ai-cta-btn.indigo{border-color:var(--indigo-6);color:var(--indigo-7);}
+.ai-cta-btn.indigo:hover{background:var(--indigo-2);}
+/* Legacy grid layout — hidden if using stack */
+.ai-grid{display:none}
+
+/* ============================================================
+   SECTION 8 — PRODUCT NEWS / WHAT'S SHIPPING
+   Soft lavender background, 3-card layout
+   ============================================================ */
+#whats-shipping{
+  background:#EDEBF8;
+  border-top:1px solid rgba(93,54,255,.1);
+}
+#whats-shipping .section-label::before{color:var(--indigo-6)}
+.shipping-section-inner{position:relative}
+.shipping-header .section-label{color:var(--ink-3)}
+.shipping-header .section-title{color:var(--ink)}
+.shipping-header .section-subtitle{color:var(--ink-2)}
+/* 3-column product grid */
+.product-grid-3{
+  display:grid;
+  grid-template-columns:1fr 1.15fr 1fr;
+  gap:1.25rem;
+  align-items:stretch;
+}
+/* Dark product card base */
+.product-card{
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  transition:transform .22s,box-shadow .22s;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.product-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+}
+.product-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  pointer-events:none;z-index:1;
+}
+/* memory — deep navy */
+.product-card.memory{
+  background:linear-gradient(155deg,#001229 0%,#002357 50%,#002a86 100%);
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+/* lab — vivid bright blue */
+.product-card.lab{
+  background:linear-gradient(155deg,#001540 0%,#003caa 50%,#1b90ff 100%);
+  box-shadow:0 4px 24px rgba(0,36,100,.6);
+}
+/* fit — indigo */
+.product-card.fit{
+  background:linear-gradient(155deg,#120833 0%,#2d1080 55%,#7858ff 100%);
+  box-shadow:0 4px 24px rgba(18,8,51,.65);
+}
+/* pam — blue-gold */
+.product-card.pam{
+  background:linear-gradient(155deg,#001a4d 0%,#0055cc 55%,#1b90ff 80%,#ffca38 115%);
+  box-shadow:0 4px 24px rgba(0,42,134,.55);
+}
+/* Lab card — image/visual area at top */
+.product-card-visual{
+  height:140px;
+  background:rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+.product-card-visual-inner{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+.product-card-inner{padding:1.5rem 1.5rem 1.25rem;flex:1;display:flex;flex-direction:column;position:relative;z-index:1}
+.product-tag{
+  display:inline-flex;align-self:flex-start;
+  font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.6);padding:.2em .7em;border-radius:99px;margin-bottom:1rem;
+}
+.product-title{font-size:1.05rem;font-weight:700;color:#fff;line-height:1.28;margin-bottom:.6rem;letter-spacing:-.01em;}
+.product-summary{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.6;flex:1;margin-bottom:1.25rem;}
+.product-divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:1rem;}
+.product-actions{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;}
+.btn-product-primary{
+  background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.78rem;font-weight:600;padding:.45em 1.1em;border-radius:99px;
+  text-decoration:none;transition:background .18s;white-space:nowrap;
+}
+.btn-product-primary:hover{background:rgba(255,255,255,.24);text-decoration:none;}
+.btn-product-secondary{
+  background:transparent;color:rgba(255,255,255,.5);
+  font-size:.78rem;font-weight:600;padding:.45em 1.1em;border-radius:99px;
+  text-decoration:none;transition:color .18s,background .18s;
+  display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;
+}
+.btn-product-secondary:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.07);text-decoration:none;}
+.product-card.pam .btn-product-primary{background:rgba(255,201,51,.18);border-color:rgba(255,201,51,.35);color:var(--mango-4);}
+.product-card.pam .btn-product-primary:hover{background:rgba(255,201,51,.3);}
+/* "White" process intelligence card — light variant */
+.product-card.light{
+  background:#fff;
+  box-shadow:var(--shadow-card);
+  border:1px solid var(--line);
+}
+.product-card.light::before{display:none}
+.product-card.light .product-tag{background:var(--indigo-2);border-color:var(--indigo-2);color:var(--indigo-10);}
+.product-card.light .product-title{color:var(--ink);}
+.product-card.light .product-summary{color:var(--ink-2);}
+.product-card.light .product-divider{background:var(--line);}
+.product-card.light .btn-product-primary{
+  background:var(--indigo-7);color:#fff;border-color:var(--indigo-7);
+}
+.product-card.light .btn-product-primary:hover{background:var(--indigo-10);}
+.product-card.light .btn-product-secondary{color:var(--ink-2);}
+.product-card.light .btn-product-secondary:hover{color:var(--ink);background:var(--bg);}
+/* 4th card (template placeholder) — hidden by default, shown as 4th theme */
+.product-card.pam-template{display:none}
+
+/* ============================================================
+   SECTION 9 — EVENTS
+   White background, featured card + 2×2 grid
+   ============================================================ */
+#events{
+  background:#fff;
+  border-top:1px solid var(--line);
+}
+.events-layout{display:flex;flex-direction:column;gap:1.25rem;}
+/* Featured wide event card */
+.event-card-featured{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card);
+  border:1px solid rgba(224,227,232,.8);
+  border-left:4px solid var(--blue-7);
+  overflow:hidden;
+  transition:box-shadow .22s,transform .22s;
+  padding:1.5rem 1.75rem;
+}
+.event-card-featured:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px);}
+.event-card-featured-inner{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;}
+.event-card-featured-date{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.78rem;font-weight:700;color:var(--blue-7);
+  background:var(--blue-2);border-radius:99px;padding:.25em .85em;
+  margin-bottom:.75rem;
+}
+.event-card-featured-title{font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.28;margin-bottom:.5rem;letter-spacing:-.01em;}
+.event-card-featured-desc{font-size:.875rem;color:var(--ink-2);line-height:1.62;margin-bottom:1rem;}
+.event-card-featured-datetime{
+  font-size:.82rem;font-weight:600;color:var(--ink-2);
+  border-top:1px solid var(--line);
+  padding-top:.75rem;margin-top:.25rem;
+}
+.event-card-featured-actions{
+  display:flex;flex-direction:column;gap:.55rem;align-items:flex-end;padding-top:2rem;
+}
+/* Standard event grid — 2×2 */
+.events-subgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.25rem;
+}
+.event-card{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card);
+  border:1px solid rgba(224,227,232,.8);
+  overflow:hidden;
+  transition:box-shadow .22s,transform .22s,border-color .22s;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.event-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px);border-color:var(--blue-4);}
+.event-card-stripe{
+  position:absolute;top:0;left:0;bottom:0;
+  width:4px;border-radius:var(--r-lg) 0 0 var(--r-lg);
+}
+.event-card-stripe.blue   {background:linear-gradient(180deg,var(--blue-6),var(--blue-7))}
+.event-card-stripe.indigo {background:linear-gradient(180deg,var(--indigo-4),var(--indigo-6))}
+.event-card-stripe.teal   {background:linear-gradient(180deg,var(--teal-4),var(--teal-6))}
+.event-card-stripe.green  {background:linear-gradient(180deg,var(--green-4),var(--green-6))}
+.event-card-stripe.gold   {background:linear-gradient(180deg,var(--mango-4),var(--mango-6))}
+.event-card-body{padding:1.25rem 1.35rem 1rem 1.7rem;flex:1;display:flex;flex-direction:column;}
+.event-chip{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.73rem;font-weight:700;color:var(--blue-10);
+  background:var(--blue-2);border-radius:4px;padding:.2em .7em;
+  margin-bottom:.75rem;letter-spacing:.02em;
+  align-self:flex-start;
+}
+.event-chip.blue   {background:var(--blue-2);color:var(--blue-10);}
+.event-chip.indigo{background:var(--indigo-2);color:var(--indigo-10);}
+.event-chip.teal  {background:var(--teal-2);color:var(--teal-10);}
+.event-chip.green {background:var(--green-2);color:var(--green-10);}
+.event-chip.gold  {background:var(--mango-2);color:var(--mango-7);}
+.event-title{font-size:.97rem;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:.45rem;letter-spacing:-.01em;}
+.event-date{font-size:.79rem;color:var(--ink-3);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem;}
+.event-location{font-size:.79rem;color:var(--ink-3);margin-bottom:.6rem;display:flex;align-items:center;gap:.35rem;}
+.event-description{font-size:.855rem;color:var(--ink-2);line-height:1.62;flex:1;margin-bottom:.75rem;}
+.event-mode{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.2em .65em;border-radius:99px;line-height:1.2;}
+.event-mode.virtual {background:var(--blue-2);color:var(--blue-10)}
+.event-mode.hybrid  {background:var(--indigo-2);color:var(--indigo-10)}
+.event-mode.onsite  {background:var(--green-2);color:var(--green-10)}
+.event-card-footer{padding:.8rem 1.35rem .8rem 1.7rem;border-top:1px solid var(--line);background:rgba(245,246,248,.5);}
+.event-actions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;}
+
+/* ============================================================
+   SECTION 10 — CUSTOMER & UX
+   Light blue-grey bg, cards with image placeholders at top
+   ============================================================ */
+#customer-ux{
+  background:#EEF2F8;
+  border-top:1px solid rgba(0,42,134,.08);
+}
+#customer-ux .section-label::before{color:var(--teal-6);}
+.ux-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.ux-card{
+  background:var(--card);
+  border-radius:var(--r-xl);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+  transition:box-shadow .22s,border-color .22s,transform .22s;
+  display:flex;flex-direction:column;
+}
+.ux-card:hover{box-shadow:var(--shadow-hover);border-color:var(--teal-4);transform:translateY(-2px);}
+/* Image placeholder area */
+.ux-card-image{
+  width:100%;
+  height:170px;
+  background:linear-gradient(135deg,#c8d4e8 0%,#dde4ef 100%);
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.ux-card-image-placeholder{
+  font-size:.75rem;font-weight:600;
+  color:rgba(71,94,117,.4);letter-spacing:.06em;text-transform:uppercase;
+}
+.ux-card-content{padding:1.5rem 1.75rem 1.5rem;flex:1;display:flex;flex-direction:column;}
+.ux-card-eyebrow{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-7);margin-bottom:.5rem;}
+.ux-card-title{font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.28;margin-bottom:.65rem;letter-spacing:-.015em;}
+.ux-card-summary{font-size:.88rem;color:var(--ink-2);line-height:1.7;flex:1;margin-bottom:1.25rem;}
+.ux-card-actions{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;}
+
+/* ============================================================
+   SECTION 11 — PROGRAMME SPOTLIGHT
+   Light bg, 2-col: dark blue visual left, white content right
+   ============================================================ */
+#programme-spotlight{
+  background:#F7F8FB;
+  border-top:1px solid var(--line);
+}
+#programme-spotlight .section-label::before{color:var(--indigo-6);}
+.spotlight-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.75rem;
+  align-items:start;
+}
+/* Left: dark blue illustrated card */
+.spotlight-visual{
+  background:linear-gradient(145deg,#001a4d 0%,#002a86 50%,#0055cc 100%);
+  border-radius:var(--r-xl);
+  box-shadow:var(--shadow-dark);
+  overflow:hidden;
+  min-height:360px;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.spotlight-visual::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:18px 18px;
+  pointer-events:none;
+}
+.spotlight-visual-inner{
+  padding:1.75rem;
+  display:flex;flex-direction:column;
+  flex:1;position:relative;z-index:1;
+}
+.spotlight-visual-tag{
+  display:inline-flex;
+  align-self:flex-start;
+  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.6);padding:.22em .75em;border-radius:99px;margin-bottom:1.25rem;
+}
+.spotlight-visual-title{
+  font-size:1.15rem;font-weight:700;color:#fff;line-height:1.28;margin-bottom:.5rem;
+}
+.spotlight-visual-sub{font-size:.85rem;color:rgba(255,255,255,.55);margin-bottom:1.5rem;}
+.spotlight-visual-svg{
+  margin-top:auto;
+  opacity:.85;
+}
+/* Right: white content card with milestone tracker */
+.spotlight-content{
+  background:var(--card);
+  border-radius:var(--r-xl);
+  box-shadow:var(--shadow-card);
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.spotlight-content-inner{padding:1.75rem 2rem;}
+.spotlight-programme-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--indigo-7);background:var(--indigo-wash);border:1px solid var(--indigo-2);
+  padding:.28em .8em;border-radius:99px;margin-bottom:1rem;
+}
+.spotlight-title{
+  font-size:clamp(1.1rem,2vw,1.5rem);font-weight:800;
+  color:var(--ink);line-height:1.22;margin-bottom:.45rem;letter-spacing:-.025em;
+}
+.spotlight-subtitle{font-size:.95rem;color:var(--indigo-7);font-weight:600;margin-bottom:.75rem;}
+.spotlight-summary{font-size:.88rem;color:var(--ink-2);line-height:1.72;margin-bottom:1.75rem;}
+/* Milestone tracker */
+.milestone-track{margin-bottom:1.75rem;}
+.milestone-track-label{
+  font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:.9rem;padding-bottom:.65rem;border-bottom:1px solid var(--line);
+}
+.milestone{display:flex;align-items:flex-start;gap:.85rem;padding-block:.55rem;position:relative;}
+.milestone:not(:last-child)::after{
+  content:'';position:absolute;left:12px;top:27px;
+  width:2px;height:calc(100% - 7px);
+  background:linear-gradient(180deg,var(--line) 0%,transparent 100%);
+  z-index:0;
+}
+.milestone-dot{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:.6rem;font-weight:700;position:relative;z-index:1;
+  box-shadow:0 0 0 3px var(--card),0 0 0 4px var(--line);
+}
+.ms-complete  {background:#e6f4ec;color:#007735}
+.ms-inprogress{background:#fdf1e7;color:#e87722}
+.ms-upcoming  {background:#e8ecf1;color:#7a8799}
+.milestone-content{flex:1;min-width:0}
+.milestone-name{font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:.1rem;}
+.milestone-desc{font-size:.77rem;color:var(--ink-3);line-height:1.5;margin-bottom:.25rem;}
+.milestone-status{
+  display:inline-flex;font-size:.62rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:.13em .6em;border-radius:99px;
+}
+.ms-badge-complete  {background:#e6f4ec;color:#007735}
+.ms-badge-inprogress{background:#fdf1e7;color:#e87722}
+.ms-badge-upcoming  {background:#e8ecf1;color:#7a8799}
+.spotlight-actions{display:flex;flex-wrap:wrap;gap:.65rem;padding:1.25rem 2rem 1.75rem;border-top:1px solid var(--line);}
+
+/* ============================================================
+   SECTION 12 — FOOTER CTA (3-column) + FOOTER BAR
+   ============================================================ */
+.footer-cta{
+  background:linear-gradient(180deg,var(--blue-11) 0%,#001060 100%);
+  padding-block:3rem;
+  position:relative;overflow:hidden;
+}
+.footer-cta::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(137,209,255,.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.footer-cta-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2rem;
+  text-align:center;
+  position:relative;z-index:1;
+}
+.footer-cta-col{
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+  padding:1.5rem 1rem;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-lg);
+  background:rgba(255,255,255,.03);
+}
+.footer-cta-col-text{
+  font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.6;max-width:22ch;
+}
+/* Footer bar */
+.footer-bar{
+  background:var(--grey-11);
+  padding-block:1.25rem;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.footer-bar-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.footer-bar-left{display:flex;align-items:center;}
+.footer-bar-logo{
+  width:32px;height:22px;background:#0070F2;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.footer-bar-name{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.02em;}
+.footer-nav{display:flex;flex-wrap:wrap;gap:.15rem 1.1rem;}
+.footer-nav a{font-size:.77rem;color:rgba(255,255,255,.32);text-decoration:none;transition:color .15s;letter-spacing:.01em;}
+.footer-nav a:hover{color:rgba(255,255,255,.72);}
+.footer-legal{font-size:.72rem;color:rgba(255,255,255,.2);text-align:right;line-height:1.6;}
+
+/* ============================================================
+   EXPANDABLE ARTICLE PANELS
+   ============================================================ */
+.expand-panel{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;
+  opacity:0;
+}
+.expand-panel.open{
+  max-height:1200px;
+  opacity:1;
+}
+.expand-body{
+  padding: 1.5rem 1.75rem 1.75rem;
+  font-size: 1rem;
+  color: var(--ink-2);
+  line-height: 1.75;
+  border-top: 1px solid var(--line);
+}
+.expand-body p {
+  margin-bottom: 1.1rem;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--ink-2);
+}
+.expand-body p:last-child { margin-bottom: 0; }
+.expand-body .expand-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+.btn-expand{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:.8rem;
+  font-weight:600;
+  color:var(--blue-7);
+  padding:0;
+  letter-spacing:.01em;
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  transition:color .15s;
+}
+.btn-expand:hover{color:var(--blue-10)}
+.btn-expand .expand-arrow{
+  display:inline-block;
+  transition:transform .25s ease;
+  font-style:normal;
+}
+.btn-expand.open .expand-arrow{transform:rotate(180deg)}
+
+/* ============================================================
+   SECTION 13 — BACK-TO-TOP BUTTON
+   ============================================================ */
+.back-to-top{
+  position:fixed;bottom:1.75rem;right:1.75rem;z-index:200;
+  width:40px;height:40px;background:var(--blue-7);color:#fff;border:none;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(0,112,242,.4),0 1px 4px rgba(0,0,0,.2);
+  opacity:0;transform:translateY(16px);
+  transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1),background .18s;
+  font-size:.95rem;line-height:1;
+}
+.back-to-top.visible{opacity:1;transform:translateY(0)}
+.back-to-top:hover{background:var(--blue-10);transform:translateY(-2px)}
+
+/* ============================================================
+   RESPONSIVE OVERRIDES
+   ============================================================ */
+@media(max-width:1100px){
+  .hero-wrap{grid-template-columns:1fr}
+  .hero-visual{min-height:200px;order:-1}
+  .feature-inner{grid-template-columns:1fr}
+  .feature-panel{display:none}
+  .spotlight-grid{grid-template-columns:1fr}
+  .spotlight-visual{min-height:200px}
+}
+@media(max-width:900px){
+  .product-grid-3{grid-template-columns:1fr 1fr}
+  .events-subgrid{grid-template-columns:1fr}
+  .event-card-featured-inner{grid-template-columns:1fr}
+  .event-card-featured-actions{align-items:flex-start;padding-top:.5rem}
+}
+@media(max-width:768px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .product-grid-3{grid-template-columns:1fr}
+  .ux-grid{grid-template-columns:1fr}
+  .footer-cta-grid{grid-template-columns:1fr}
+  .footer-bar-inner{flex-direction:column;text-align:center}
+  .footer-nav{justify-content:center}
+  .footer-legal{text-align:center}
+  /* Masthead collapses: SAP logo + edition stack, title stays centered */
+  .masthead-center{position:static;transform:none;text-align:center;order:2;width:100%;margin-block:.35rem}
+  .masthead-inner{flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem}
+  .masthead-sap{order:1}
+  .masthead-edition{order:3}
+  .ai-cta-row{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:520px){
+  .hero-actions{flex-direction:column;align-items:flex-start}
+  .spotlight-actions{flex-direction:column}
+  .feature-inner{padding-block:2rem}
+  .event-card-featured{padding:1.25rem}
+  .masthead-edition{display:none}
+}
+
+/* ============================================================
+   REDESIGN V2 — VISUAL HIERARCHY + ALL DESIGN FIXES
+   ============================================================ */
+
+/* ── GLOBAL TYPOGRAPHY SCALE ── */
+body { font-size: 1rem; line-height: 1.65; }
+.story-card-summary   { font-size: 1rem; line-height: 1.7; }
+.story-card-title     { font-size: 1.15rem; }
+.event-title          { font-size: 1.05rem; }
+.event-description    { font-size: 1rem; line-height: 1.68; }
+.ux-card-title        { font-size: 1.2rem; }
+.ux-card-summary      { font-size: 1rem; line-height: 1.72; }
+.pid-desc             { font-size: 1rem; }
+.btn                  { font-size: .9rem; }
+.btn-sm               { font-size: .85rem; padding: .45em 1.1em; }
+
+/* ── SECTION WRAPPER ── */
+.section { padding-block: clamp(3rem,5vw,4.5rem); }
+.section-header { margin-bottom: 2.25rem; }
+.section-label {
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  margin-bottom: .65rem;
+  display: block;
+}
+.section-title {
+  font-size: clamp(2rem,4vw,3rem);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1.1;
+}
+.section-divider { display: none; }
+
+/* ── AI AT SIGNAVIO — light indigo bg ── */
+#ai-signavio {
+  background: #EEE8FF;
+  border-top: none;
+}
+#ai-signavio .section-header {
+  margin-bottom: 1.25rem;
+  padding-top: .25rem;
+}
+#ai-signavio .section-label {
+  color: #1C0C6E;
+  font-size: clamp(1.35rem,2.5vw,1.75rem);
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.2;
+  margin-bottom: 0;
+  text-transform: uppercase;
+}
+#ai-signavio .section-label::before { color: #5D36FF; }
+#ai-signavio .section-title { color: #1C0C6E; }
+
+/* AI story grid — single full-width column */
+.ai-stories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+/* Featured AI story card — larger treatment */
+.ai-feature-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #B894FF;
+  box-shadow: 0 2px 16px rgba(93,54,255,.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .22s, transform .22s;
+}
+.ai-feature-card:hover { box-shadow: 0 6px 28px rgba(93,54,255,.18); transform: translateY(-2px); }
+.ai-feature-card .story-card-accent { height: 4px; }
+.ai-feature-card .story-card-body { padding: 1.75rem 1.75rem .75rem; flex: 1; }
+.ai-feature-card .story-card-eyebrow { margin-bottom: .75rem; }
+.ai-feature-card .story-card-title {
+  font-size: clamp(1.4rem,2.2vw,1.75rem);
+  font-weight: 900;
+  color: #1C0C6E;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -.025em;
+  position: relative;
+  padding-bottom: .9rem;
+}
+.ai-feature-card .story-card-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 56px;
+  height: 3px;
+  background: linear-gradient(90deg, #5D36FF 0%, #2CE0BF 100%);
+  border-radius: 2px;
+}
+.ai-feature-card .story-card-summary { font-size: 1.05rem; color: #475E75; }
+.ai-feature-card .story-card-footer {
+  padding: 1rem 1.75rem 1.25rem;
+  background: #F3F0FF;
+  border-top: 1px solid #E2D8FF;
+  display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+  order: 2;
+  transition: background .25s, border-color .25s, padding .25s;
+}
+.ai-feature-card .expand-panel {
+  background: #fff;
+  order: 3;
+}
+/* When expanded: footer moves BELOW the expanded body so flow is teaser → body → resources → CTA */
+.ai-feature-card.is-expanded .expand-panel,
+.ai-feature-card:has(.expand-panel.open) .expand-panel { order: 2; }
+.ai-feature-card.is-expanded .story-card-footer,
+.ai-feature-card:has(.expand-panel.open) .story-card-footer {
+  order: 3;
+  background: linear-gradient(180deg, #FAF8FF 0%, #F3F0FF 100%);
+  border-top: 1px solid #E2D8FF;
+  padding: 1.25rem 2rem 1.5rem;
+  justify-content: space-between;
+}
+.ai-feature-card .expand-body {
+  color: #475E75;
+  background: #fff;
+  border-top-color: #E2D8FF;
+  padding: 1.75rem 1.75rem 2rem;
+}
+.ai-feature-card .expand-body p {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: #475E75;
+  margin-bottom: 1.3rem;
+  max-width: none;
+}
+/* Ambition lead-in before the pull quote */
+.ai-feature-card .expand-body p.ai-ambition-lead {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #1C0C6E;
+  letter-spacing: -.005em;
+  margin-bottom: .5rem;
+}
+
+/* Call to action subheading */
+.ai-feature-card .expand-body h3.ai-cta-heading {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1C0C6E;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  margin: 1.75rem 0 .65rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #E2D8FF;
+  position: relative;
+}
+.ai-feature-card .expand-body h3.ai-cta-heading::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 42px;
+  height: 2px;
+  background: #5D36FF;
+}
+.ai-feature-card .expand-body p:last-child { margin-bottom: 0; }
+
+/* Editorial pull-quote inside AI article */
+.ai-feature-card .ai-pullquote {
+  position: relative;
+  margin: 1.75rem 0 1.75rem;
+  padding: 1.5rem 1.75rem 1.5rem 3.5rem;
+  background: linear-gradient(135deg, #F3F0FF 0%, #E2D8FF 100%);
+  border-left: 4px solid #5D36FF;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 2px 10px rgba(93,54,255,.08);
+}
+.ai-feature-card .ai-pullquote::before {
+  content: '“';
+  position: absolute;
+  top: .25rem;
+  left: 1rem;
+  font-family: 'Georgia', serif;
+  font-size: 3.6rem;
+  line-height: 1;
+  color: #5D36FF;
+  opacity: .35;
+  font-weight: 700;
+  pointer-events: none;
+}
+.ai-feature-card .ai-pullquote p {
+  font-size: 1.22rem;
+  line-height: 1.5;
+  color: #1C0C6E;
+  font-weight: 700;
+  margin: 0;
+  max-width: none;
+  font-style: italic;
+  letter-spacing: -.01em;
+}
+
+/* Resources grid inside AI article expand body — editorial "related" shelf */
+.ai-feature-card .ai-resources {
+  margin: 2rem -1.75rem -2rem;
+  padding: 1.25rem 1.75rem 1.5rem;
+  background: #FAF8FF;
+  border-top: 1px solid #E2D8FF;
+}
+.ai-feature-card .ai-resources-label {
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #5D36FF;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ai-feature-card .ai-resources-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #E2D8FF 0%, transparent 100%);
+}
+.ai-feature-card .ai-resources-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+}
+.ai-feature-card .ai-resource-card {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .65rem .85rem;
+  background: #F3F0FF;
+  border: 1px solid #E2D8FF;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: transform .15s, box-shadow .2s, border-color .2s, background .2s;
+  min-height: 0;
+  color: #1C0C6E;
+}
+.ai-feature-card .ai-resource-card::before { display: none; }
+.ai-feature-card .ai-resource-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(93,54,255,.14);
+  border-color: #B894FF;
+  background: #EEE8FF;
+  text-decoration: none;
+}
+.ai-feature-card .ai-resource-top { display: none; }
+.ai-feature-card .ai-resource-kicker { display: none; }
+.ai-feature-card .ai-resource-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #5D36FF;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: .85rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(93,54,255,.28);
+}
+.ai-feature-card .ai-resource-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.ai-feature-card .ai-resource-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #1C0C6E;
+  line-height: 1.25;
+  letter-spacing: -.005em;
+  margin: 0;
+}
+.ai-feature-card .ai-resource-note {
+  font-size: .72rem;
+  color: var(--ink-3);
+  line-height: 1.35;
+  margin: .1rem 0 0;
+}
+.ai-feature-card .ai-resource-cta {
+  display: none;
+}
+.ai-feature-card .ai-resource-arrow {
+  margin-left: auto;
+  color: #7858FF;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: transform .15s;
+}
+.ai-feature-card .ai-resource-card:hover .ai-resource-arrow { transform: translateX(3px); }
+
+@media (max-width: 900px) {
+  .ai-feature-card .ai-resources-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .ai-feature-card .ai-resources-grid { grid-template-columns: 1fr; }
+}
+
+/* Sidebar AI card */
+.ai-sidebar-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #B894FF;
+  box-shadow: 0 2px 12px rgba(93,54,255,.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .22s, transform .22s;
+}
+.ai-sidebar-card:hover { box-shadow: 0 5px 20px rgba(93,54,255,.15); transform: translateY(-2px); }
+.ai-sidebar-card .story-card-accent { height: 4px; }
+.ai-sidebar-card .story-card-body { padding: 1.25rem 1.35rem .6rem; flex: 1; }
+.ai-sidebar-card .story-card-title { font-size: 1.05rem; font-weight: 700; color: #1C0C6E; }
+.ai-sidebar-card .story-card-summary { font-size: .92rem; color: #475E75; }
+.ai-sidebar-card .story-card-footer {
+  padding: .85rem 1.35rem 1rem;
+  background: #F3F0FF;
+  border-top: 1px solid #E2D8FF;
+  display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+  margin-top: auto;
+}
+.ai-sidebar-card .expand-body { color: var(--ink-2); background: #fff; border-top-color: #E2D8FF; }
+.ai-sidebar-card .expand-body p { color: var(--ink-2); }
+.ai-sidebar-card .expand-panel { background: #fff; }
+
+/* AI section button overrides */
+#ai-signavio .btn-primary { background: #5D36FF; border-color: #5D36FF; color: #fff; }
+#ai-signavio .btn-primary:hover { background: #4A28E0; border-color: #4A28E0; }
+#ai-signavio .btn-secondary { color: #5D36FF; border-color: #5D36FF; }
+#ai-signavio .btn-secondary:hover { background: #E2D8FF; border-color: #7858FF; }
+#ai-signavio .btn-ghost { color: #475E75; border-color: #A9B4BE; }
+#ai-signavio .btn-expand { color: #5D36FF; }
+#ai-signavio .tag.tp-indigo { background: #E2D8FF; color: #1C0C6E; }
+#ai-signavio .tag.tp-blue { background: #D1EFFF; color: #002A86; }
+
+/* ── AI EDITORIAL ILLUSTRATION — premium feature visual ── */
+.ai-hero-illustration {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1C0C6E 0%, #2D1B78 40%, #5D36FF 85%, #7858FF 100%);
+  box-shadow: 0 2px 16px rgba(28,12,110,.14), 0 12px 40px rgba(93,54,255,.18);
+  margin-bottom: 1.25rem;
+  margin-top: .25rem;
+  isolation: isolate;
+}
+.ai-hero-illustration svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ai-hero-illustration::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 70% at 85% 30%, rgba(44,224,191,.12) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 85%, rgba(184,148,255,.14) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── AIPOM SECTION — full-width card, Blue 2 bg ── */
+#aipom {
+  background: #D1EFFF;
+  border-top: none;
+  padding-block: clamp(2.5rem,4vw,3.5rem);
+}
+#aipom .section-label { color: #0070F2; font-size: .75rem; font-weight: 800; letter-spacing: .15em; }
+#aipom .section-label::before { color: #0070F2; }
+#aipom .section-title { color: #002A86; }
+
+/* AIPOM full-width single-column card */
+.aipom-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #89D1FF;
+  box-shadow: 0 2px 12px rgba(0,112,242,.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .22s, transform .22s;
+}
+.aipom-card:hover { box-shadow: 0 6px 24px rgba(0,112,242,.14); transform: translateY(-2px); }
+.aipom-card-accent { height: 4px; background: linear-gradient(90deg,#0070F2,#89D1FF); flex-shrink: 0; order: 0; }
+.aipom-card-main {
+  padding: 1.75rem 1.75rem .75rem;
+  display: flex;
+  flex-direction: column;
+  order: 1;
+}
+.aipom-card-eyebrow {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: .69rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .25em .75em;
+  border-radius: 99px;
+  background: #D1EFFF;
+  color: #002A86;
+  line-height: 1.2;
+  margin-bottom: .75rem;
+}
+.aipom-card-title {
+  font-size: clamp(1.25rem,2vw,1.6rem);
+  font-weight: 800;
+  color: #002A86;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  margin-bottom: .8rem;
+}
+/* Prominent lede opener — "First off: Thank You." visual callout */
+.aipom-card-lede {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: .25rem 0 1.1rem;
+  padding: .85rem 1.1rem .85rem 1.1rem;
+  background: linear-gradient(135deg, #EEF7FF 0%, #D1EFFF 100%);
+  border-left: 4px solid #0070F2;
+  border-radius: 0 10px 10px 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #002A86;
+  letter-spacing: -.005em;
+  line-height: 1.3;
+  box-shadow: 0 1px 6px rgba(0,112,242,.08);
+}
+.aipom-card-lede::before {
+  content: '♥';
+  font-size: 1rem;
+  color: #0070F2;
+  flex-shrink: 0;
+}
+
+/* Inline keyword highlight pills — used sparingly inside AIPOM article copy */
+.aipom-card-intro .pill,
+.aipom-expand-body .pill {
+  display: inline-block;
+  padding: .08em .55em;
+  background: #D1EFFF;
+  color: #002A86;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: .92em;
+  line-height: 1.4;
+  letter-spacing: .005em;
+  white-space: nowrap;
+}
+.aipom-card-intro .pill.pill-indigo,
+.aipom-expand-body .pill.pill-indigo {
+  background: #E2D8FF;
+  color: #1C0C6E;
+}
+.aipom-card-intro .pill.pill-teal,
+.aipom-expand-body .pill.pill-teal {
+  background: #C2FCEE;
+  color: #02414C;
+}
+/* Pill that is also an anchor link */
+.aipom-card-intro a.pill,
+.aipom-expand-body a.pill {
+  text-decoration: none;
+  transition: background .18s, color .18s, box-shadow .18s, transform .12s;
+}
+.aipom-card-intro a.pill:hover,
+.aipom-expand-body a.pill:hover {
+  text-decoration: none;
+  background: #2CE0BF;
+  color: #02414C;
+  box-shadow: 0 2px 8px rgba(44,224,191,.3);
+  transform: translateY(-1px);
+}
+.aipom-card-intro a.pill::after,
+.aipom-expand-body a.pill::after {
+  content: ' ›';
+  font-weight: 800;
+}
+.aipom-card-intro p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #475E75;
+  margin-bottom: 1rem;
+  max-width: none;
+}
+.aipom-card-intro p:last-child { margin-bottom: 0; }
+
+/* Actions footer — matches AI article footer behavior */
+.aipom-card-actions {
+  padding: 1rem 1.75rem 1.25rem;
+  background: #EEF7FF;
+  border-top: 1px solid #D1EFFF;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+  order: 2;
+  margin-top: 0;
+  transition: background .25s, border-color .25s, padding .25s;
+}
+
+/* Expand body container — wraps the panel */
+.aipom-expand-body {
+  order: 3;
+  border-top: none;
+}
+.aipom-expand-body .expand-panel { background: #fff; }
+.aipom-expand-body .expand-body {
+  border-top: 1px solid #D1EFFF;
+  padding: 1.75rem 1.75rem 2rem;
+  color: var(--ink-2);
+  background: #fff;
+}
+.aipom-expand-body .expand-body p {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: #475E75;
+  margin-bottom: 1.3rem;
+  max-width: none;
+}
+.aipom-expand-body .expand-body p:last-child { margin-bottom: 0; }
+
+/* When expanded: footer moves BELOW the body, matching AI card flow */
+.aipom-card.is-expanded .aipom-expand-body,
+.aipom-card:has(.expand-panel.open) .aipom-expand-body { order: 2; }
+.aipom-card.is-expanded .aipom-card-actions,
+.aipom-card:has(.expand-panel.open) .aipom-card-actions {
+  order: 3;
+  background: linear-gradient(180deg, #F5FAFF 0%, #EEF7FF 100%);
+  border-top: 1px solid #D1EFFF;
+  padding: 1.25rem 2rem 1.5rem;
+  justify-content: space-between;
+}
+
+/* Editorial subheadings inside expand body (replace heavy key-point boxes) */
+.aipom-expand-body .expand-body h3.aipom-sub {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #002A86;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  margin: 1.75rem 0 .65rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #D1EFFF;
+  position: relative;
+}
+.aipom-expand-body .expand-body h3.aipom-sub::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 42px;
+  height: 2px;
+  background: #0070F2;
+}
+
+/* Resources shelf — blue variant of the AI shelf */
+.aipom-expand-body .aipom-resources {
+  margin: 2rem -1.75rem -2rem;
+  padding: 1.25rem 1.75rem 1.5rem;
+  background: #F5FAFF;
+  border-top: 1px solid #D1EFFF;
+}
+.aipom-expand-body .aipom-resources-label {
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #0070F2;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.aipom-expand-body .aipom-resources-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #D1EFFF 0%, transparent 100%);
+}
+.aipom-expand-body .aipom-resources-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .6rem;
+}
+.aipom-expand-body .aipom-resource-card {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .65rem .85rem;
+  background: #EEF7FF;
+  border: 1px solid #D1EFFF;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: transform .15s, box-shadow .2s, border-color .2s, background .2s;
+  color: #002A86;
+}
+.aipom-expand-body .aipom-resource-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,112,242,.14);
+  border-color: #89D1FF;
+  background: #D1EFFF;
+  text-decoration: none;
+}
+.aipom-expand-body .aipom-resource-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #0070F2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: .85rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,112,242,.28);
+}
+.aipom-expand-body .aipom-resource-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.aipom-expand-body .aipom-resource-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #002A86;
+  line-height: 1.25;
+  letter-spacing: -.005em;
+  margin: 0;
+}
+.aipom-expand-body .aipom-resource-arrow {
+  margin-left: auto;
+  color: #1B90FF;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: transform .15s;
+}
+.aipom-expand-body .aipom-resource-card:hover .aipom-resource-arrow { transform: translateX(3px); }
+
+@media (max-width: 600px) {
+  .aipom-expand-body .aipom-resources-grid { grid-template-columns: 1fr; }
+}
+
+/* ── EVENTS SECTION — very light teal bg ── */
+#events {
+  background: #F0FEFB;
+  border-top: none;
+}
+#events .section-label { color: #07838F; font-size: .75rem; font-weight: 800; letter-spacing: .15em; }
+#events .section-label::before { color: #07838F; }
+#events .section-title { color: #02414C; }
+#events .event-card { background: #fff; }
+
+/* ── PID — FEATURED EVENT CARD ── */
+.pid-featured {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #89D1FF;
+  box-shadow: 0 2px 16px rgba(0,112,242,.1);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: box-shadow .22s, transform .22s;
+  display: flex;
+  flex-direction: column;
+}
+.pid-featured:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,112,242,.16); }
+.pid-accent-bar { height: 5px; background: linear-gradient(90deg, #0070F2, #5D36FF, #2CE0BF); }
+.pid-image-strip {
+  position: relative;
+  overflow: hidden;
+  background: #001233;
+  isolation: isolate;
+}
+.pid-image-strip svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pid-image-strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 55% 70% at 85% 30%, rgba(44,224,191,.10) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 85%, rgba(0,112,242,.14) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+.pid-image-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+.pid-card-body {
+  padding: 1.5rem 1.75rem .75rem;
+}
+.pid-card-eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-bottom: .95rem;
+}
+.pid-chip-featured {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  background: #D1EFFF;
+  color: #002A86;
+  border-radius: 99px;
+  padding: .28em .9em;
+}
+.pid-chip-dates {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--ink-3);
+}
+/* Date badge pills — header row */
+.pid-date-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-left: .5rem;
+}
+.pid-date-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: .15em .45em .2em;
+  border-radius: 7px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow: 0 1px 3px rgba(0,112,242,.12);
+}
+.pid-date-badge .pid-date-day {
+  font-size: .95rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+.pid-date-badge .pid-date-month {
+  font-size: .52rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  margin-top: .12em;
+  opacity: .85;
+}
+.pid-date-badge.virtual {
+  background: #D1EFFF;
+  color: #002A86;
+  border: 1px solid #89D1FF;
+}
+.pid-date-badge.onsite {
+  background: #C2FCEE;
+  color: #02414C;
+  border: 1px solid #2CE0BF;
+}
+.pid-card-title {
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 800;
+  color: #002A86;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  margin-bottom: .7rem;
+}
+.pid-card-summary {
+  font-size: 1rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.pid-card-footer {
+  padding: .85rem 1.75rem 1.1rem;
+  background: #EEF7FF;
+  border-top: 1px solid #D1EFFF;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  align-items: center;
+  justify-content: flex-start;
+  order: 2;
+  transition: background .25s, border-color .25s, padding .25s;
+}
+.pid-featured .expand-panel { order: 3; }
+/* When expanded: footer moves BELOW the expanded body */
+.pid-featured.is-expanded .expand-panel,
+.pid-featured:has(.expand-panel.open) .expand-panel { order: 2; }
+.pid-featured.is-expanded .pid-card-footer,
+.pid-featured:has(.expand-panel.open) .pid-card-footer {
+  order: 3;
+  background: linear-gradient(180deg, #F5FAFF 0%, #EEF7FF 100%);
+  padding: 1.25rem 2rem 1.5rem;
+  justify-content: flex-start;
+}
+/* Expand panel: dates + audience + why/what/how + sponsors */
+.pid-featured .expand-body {
+  border-top-color: #D1EFFF;
+  color: var(--ink-2);
+  background: #fff;
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+.pid-expand-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.pid-expand-date-group { display: flex; flex-direction: column; gap: .35rem; }
+.pid-expand-date-label {
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: .1rem;
+}
+.pid-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: #EEF7FF;
+  border: 1px solid #89D1FF;
+  border-radius: 99px;
+  padding: .3em .85em;
+  font-size: .82rem;
+  font-weight: 700;
+  color: #002A86;
+  width: fit-content;
+}
+.pid-date-pill-loc {
+  font-weight: 500;
+  color: var(--ink-3);
+  border-left: 1px solid #89D1FF;
+  padding-left: .4rem;
+}
+.pid-expand-audience {
+  margin-bottom: 1.5rem;
+}
+.pid-expand-section-label {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #002A86;
+  margin: 0 0 .85rem;
+  padding-top: 1rem;
+  padding-bottom: .5rem;
+  border-top: 1px solid #D1EFFF;
+  position: relative;
+}
+.pid-expand-section-label:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+.pid-expand-section-label::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 42px;
+  height: 2px;
+  background: #0070F2;
+}
+.pid-expand-section-label:first-of-type::before { display: none; }
+.pid-audience-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.pid-audience-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .35em .85em;
+  border-radius: 99px;
+  border: 1px solid transparent;
+  letter-spacing: .005em;
+  line-height: 1.25;
+  transition: transform .15s, box-shadow .15s;
+}
+.pid-audience-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,42,134,.12); }
+.pid-audience-chip::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: .5em;
+  background: currentColor;
+  opacity: .65;
+}
+.pid-audience-chip.aud-pm    { background: #D1EFFF; color: #002A86; border-color: #89D1FF; }
+.pid-audience-chip.aud-eng   { background: #E2D8FF; color: #1C0C6E; border-color: #B894FF; }
+.pid-audience-chip.aud-ux    { background: #C2FCEE; color: #02414C; border-color: #2CE0BF; }
+.pid-audience-chip.aud-adopt { background: #EBF5CB; color: #164323; border-color: #97DD40; }
+.pid-audience-chip.aud-dec   { background: #FFF3B8; color: #C35500; border-color: #FFC933; }
+.pid-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .85rem;
+  margin-bottom: 1.5rem;
+}
+.pid-pillar {
+  position: relative;
+  background: linear-gradient(145deg, #FFFFFF 0%, #F5FAFF 100%);
+  border: 1px solid #D1EFFF;
+  border-radius: 12px;
+  padding: 1.05rem 1.15rem 1rem;
+  box-shadow: 0 1px 6px rgba(0,112,242,.06);
+  transition: transform .18s, box-shadow .2s, border-color .2s;
+}
+.pid-pillar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,112,242,.14);
+  border-color: #89D1FF;
+}
+.pid-pillar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1.15rem;
+  right: 1.15rem;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: #0070F2;
+}
+.pid-pillar.why::before  { background: linear-gradient(90deg, #0070F2, #89D1FF); }
+.pid-pillar.what::before { background: linear-gradient(90deg, #5D36FF, #B894FF); }
+.pid-pillar.how::before  { background: linear-gradient(90deg, #049F9A, #2CE0BF); }
+.pid-pillar-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .55rem;
+}
+.pid-pillar-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 800;
+}
+.pid-pillar.why  .pid-pillar-icon { background: #0070F2; box-shadow: 0 2px 6px rgba(0,112,242,.28); }
+.pid-pillar.what .pid-pillar-icon { background: #5D36FF; box-shadow: 0 2px 6px rgba(93,54,255,.28); }
+.pid-pillar.how  .pid-pillar-icon { background: #049F9A; box-shadow: 0 2px 6px rgba(4,159,154,.28); }
+.pid-pillar-label {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+.pid-pillar.why  .pid-pillar-label { color: #002A86; }
+.pid-pillar.what .pid-pillar-label { color: #1C0C6E; }
+.pid-pillar.how  .pid-pillar-label { color: #07838F; }
+.pid-pillar-text {
+  font-size: .875rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin: 0;
+}
+.pid-sponsors {
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+.pid-sponsors .pid-expand-section-label {
+  padding-top: 0;
+  border-top: none;
+  margin-bottom: .8rem;
+}
+.pid-sponsors .pid-expand-section-label::before { display: none; }
+.pid-sponsors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .75rem;
+}
+.pid-sponsor-card {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .85rem 1rem;
+  background: #F5FAFF;
+  border: 1px solid #D1EFFF;
+  border-radius: 10px;
+  transition: transform .15s, box-shadow .2s, border-color .2s;
+}
+.pid-sponsor-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,112,242,.1);
+  border-color: #89D1FF;
+}
+.pid-sponsor-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: .9rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #fff;
+  background: linear-gradient(135deg, #0070F2 0%, #002A86 100%);
+  box-shadow: 0 2px 6px rgba(0,42,134,.3);
+}
+.pid-sponsor-body { display: flex; flex-direction: column; min-width: 0; }
+.pid-sponsor-name {
+  font-size: .95rem;
+  font-weight: 800;
+  color: #002A86;
+  line-height: 1.25;
+  letter-spacing: -.005em;
+}
+.pid-sponsor-role {
+  font-size: .78rem;
+  color: var(--ink-3);
+  line-height: 1.4;
+  margin-top: .1rem;
+}
+@media (max-width: 640px) {
+  .pid-sponsors-grid { grid-template-columns: 1fr; }
+}
+.pid-featured .btn-primary { background: #0070F2; border-color: #0070F2; color: #fff; }
+.pid-featured .btn-primary:hover { background: #0060d9; }
+.pid-featured .btn-secondary { color: #0070F2; border-color: #89D1FF; }
+.pid-featured .btn-secondary:hover { background: #D1EFFF; }
+.pid-featured .btn-expand { color: #0070F2; }
+@media (max-width: 640px) {
+  .pid-pillars { grid-template-columns: 1fr; }
+}
+
+/* Replay cards — strict 50/50 */
+.replay-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+.replay-grid .event-card { height: 100%; }
+
+/* ── EXPERIENCE SECTION ── */
+#experience {
+  background: #EBF5CB;
+  border-top: none;
+}
+#experience .section-label { color: #188918; font-size: .75rem; font-weight: 800; letter-spacing: .15em; }
+#experience .section-label::before { color: #188918; }
+#experience .section-title { color: #164323; }
+
+/* Feature article card — single column, image on top */
+.stes-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px solid #D8EFB8;
+  box-shadow: 0 2px 16px rgba(24,137,24,.08);
+  overflow: hidden;
+  transition: box-shadow .22s, transform .22s;
+}
+.stes-card:hover { box-shadow: 0 6px 28px rgba(24,137,24,.14); transform: translateY(-2px); }
+.stes-img-strip {
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: #EBF5CB;
+}
+.stes-img-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.stes-body {
+  padding: 1.75rem 2rem .75rem;
+}
+.stes-eyebrow {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #188918;
+  margin-bottom: .65rem;
+  display: block;
+}
+.stes-title {
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  font-weight: 800;
+  color: #164323;
+  line-height: 1.28;
+  margin-bottom: .85rem;
+  letter-spacing: -.015em;
+}
+.stes-summary {
+  font-size: 1rem;
+  color: var(--ink-2);
+  line-height: 1.75;
+  margin-bottom: 0;
+  max-width: 72ch;
+}
+.stes-footer {
+  padding: .85rem 2rem 1.1rem;
+  background: #F4FBEC;
+  border-top: 1px solid #D8EFB8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+}
+#experience .expand-body { color: var(--ink-2); }
+#experience .expand-body p { color: var(--ink-2); }
+#experience .stes-card { background: #fff; }
+
+/* ── GLOBAL EXPAND BODY — editorial article style, soft ink ── */
+.expand-body { color: var(--ink-2); }
+.expand-body p { color: var(--ink-2); }
+.expand-body strong { color: var(--ink); }
+
+/* ── CARD DEPTH — section vs card contrast ── */
+#ai-signavio .ai-feature-card,
+#ai-signavio .ai-sidebar-card,
+#aipom .aipom-card,
+#events .event-card,
+#events .pid-featured { background: #fff; }
+
+/* Story cards — flex column, actions at bottom */
+.story-card { display: flex; flex-direction: column; }
+.story-card-body { flex: 1; }
+.story-card-footer { margin-top: auto; }
+
+/* Event cards — flex column, actions at bottom */
+.event-card-body { display: flex; flex-direction: column; flex: 1; }
+.event-description { flex: 1; }
+.event-actions { margin-top: auto; padding-top: .75rem; }
+
+/* ux-card actions at bottom */
+.ux-card-content { display: flex; flex-direction: column; flex: 1; }
+.ux-card-summary { flex: 1; }
+.ux-card-actions { margin-top: auto; }
+
+/* Footer CTA hidden (content moved into cards) */
+.footer-cta { display: none; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .ai-stories-grid { grid-template-columns: 1fr; }
+  .aipom-card { grid-template-columns: 1fr; }
+  .aipom-card-left { border-right: none; border-bottom: 1px solid #D1EFFF; }
+  .aipom-card-right { background: #fff; }
+  .stes-img-strip { height: 200px; }
+  .replay-grid { grid-template-columns: 1fr; }
+}
+@media(max-width:768px){
+  .pid-dates { gap: .4rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     MASTHEAD
+     ============================================================ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-inner">
+      <div class="masthead-sap">
+        <img src="assets/SAP-logo.png" class="masthead-sap-logo" alt="SAP" width="120">
+      </div>
+      <div class="masthead-center">
+        <div class="masthead-title">The Stack</div>
+        <div class="masthead-sub">SAP SIGNAVIO P&amp;E NEWS &nbsp;·&nbsp; November 2026</div>
+      </div>
+      <div class="masthead-edition">
+        <div class="masthead-edition-date">November 2026</div>
+        <div class="masthead-edition-label">SAP Signavio P&amp;E · Issue 4</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     TICKER BAR
+     Source: Content_.docx headlines only
+     ============================================================ -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-track" id="tickerTrack">
+    <div class="ticker-item"><span class="tag tp-ticker-prog">AI</span><span>AI maturity quiz refreshed for 2026</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-events">EVENTS</span><span>Product Insights Day registration now open</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-lab">AIPOM</span><span>FIT Frontrunner now running with eight pods</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-brief">REPLAY</span><span>Discovery Series Horizon replay available on demand</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-brief">REPLAY</span><span>SAP TechEd sessions available for replay</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-ux">EXPERIENCE</span><span>Usability Lab at Berlin Summit · 175 customers</span></div>
+    <div class="ticker-item"><span class="tag tp-ticker-events">EVENTS</span><span>P&amp;E End of Year Meeting · Dec 10</span></div>
+    <!-- Duplicate set injected by JS -->
+  </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     NAVIGATION
+     Sections: AI at Signavio | Events | Experience & AIPOM
+     ============================================================ -->
+<nav class="site-nav" id="siteNav">
+  <div class="wrap nav-inner">
+    <a href="#ai-signavio"  class="nav-link">AI at Signavio</a>
+    <a href="#aipom"        class="nav-link">AIPOM &amp; Frontrunner</a>
+    <a href="#events"       class="nav-link">Events &amp; Replays</a>
+    <a href="#experience"   class="nav-link">Experience</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     SECTION: AI AT SIGNAVIO  (first — primary feature)
+     Source: Content_.docx lines 048–059
+     ============================================================ -->
+<hr class="section-divider indigo">
+<section id="ai-signavio" class="section">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-label">AI AT SIGNAVIO</div>
+    </div>
+
+    <!-- Editorial illustration — AI capability growth across teams -->
+    <div class="ai-hero-illustration" role="img" aria-label="Editorial illustration: AI capability growing across teams — connected professionals, learning paths and AI assistants.">
+      <svg viewBox="-150 20 1440 265" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="aiBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1C0C6E"/>
+            <stop offset="55%" stop-color="#2D1B78"/>
+            <stop offset="100%" stop-color="#5D36FF"/>
+          </linearGradient>
+          <linearGradient id="curveGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5D36FF" stop-opacity="0"/>
+            <stop offset="35%" stop-color="#7858FF" stop-opacity=".55"/>
+            <stop offset="70%" stop-color="#2CE0BF" stop-opacity=".75"/>
+            <stop offset="100%" stop-color="#2CE0BF" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="curveGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#B894FF" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#B894FF" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="#89D1FF" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2CE0BF" stop-opacity=".45"/>
+            <stop offset="60%" stop-color="#2CE0BF" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="nodeGlowPurple" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#B894FF" stop-opacity=".55"/>
+            <stop offset="60%" stop-color="#B894FF" stop-opacity="0"/>
+          </radialGradient>
+          <pattern id="dotGrid" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="#ffffff" fill-opacity=".05"/>
+          </pattern>
+        </defs>
+
+        <!-- Base -->
+        <rect x="-150" y="20" width="1440" height="265" fill="url(#aiBg)"/>
+        <rect x="-150" y="20" width="1440" height="265" fill="url(#dotGrid)"/>
+
+        <!-- Soft atmospheric halos -->
+        <circle cx="980" cy="110" r="220" fill="url(#nodeGlow)"/>
+        <circle cx="180" cy="270" r="200" fill="url(#nodeGlowPurple)"/>
+
+        <!-- Editorial kicker typography (very subtle) -->
+        <text x="60" y="56" fill="#ffffff" fill-opacity=".38" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="3.5">AI MATURITY · CAPABILITY GROWTH · COLLABORATION</text>
+        <line x1="60" y1="70" x2="420" y2="70" stroke="#ffffff" stroke-opacity=".12" stroke-width="1"/>
+
+        <!-- Section markers on the right -->
+        <text x="1140" y="56" fill="#89D1FF" fill-opacity=".55" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2.5" text-anchor="end">THE STACK · NOV 2026</text>
+
+        <!-- AI Maturity progression band -->
+        <line x1="60" y1="265" x2="1140" y2="265" stroke="#ffffff" stroke-opacity=".08" stroke-width="1"/>
+        <text x="60" y="251" fill="#ffffff" fill-opacity=".42" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5">AI MATURITY JOURNEY</text>
+
+        <!-- 5-stage progression: Explore → Learn → Apply → Grow → Lead -->
+        <g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8" fill="#89D1FF" fill-opacity=".72" text-anchor="middle">
+          <text x="155"  y="282">EXPLORE</text>
+          <text x="400"  y="282">LEARN</text>
+          <text x="645"  y="282">APPLY</text>
+          <text x="890"  y="282">GROW</text>
+          <text x="1085" y="282">LEAD</text>
+        </g>
+
+        <!-- Stage markers with growing capability — dots scale up to signal maturity growth -->
+        <g>
+          <!-- Explore -->
+          <circle cx="155" cy="265" r="2.5" fill="#B894FF" fill-opacity=".7"/>
+          <!-- connector -->
+          <line x1="165" y1="265" x2="390" y2="265" stroke="#B894FF" stroke-opacity=".22" stroke-width="1" stroke-dasharray="2 3"/>
+          <!-- Learn -->
+          <circle cx="400" cy="265" r="3" fill="#B894FF" fill-opacity=".8"/>
+          <line x1="410" y1="265" x2="635" y2="265" stroke="#7858FF" stroke-opacity=".3" stroke-width="1" stroke-dasharray="2 3"/>
+          <!-- Apply -->
+          <circle cx="645" cy="265" r="3.5" fill="#7858FF"/>
+          <line x1="656" y1="265" x2="879" y2="265" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1" stroke-dasharray="2 3"/>
+          <!-- Grow -->
+          <circle cx="890" cy="265" r="4" fill="#2CE0BF" fill-opacity=".85"/>
+          <line x1="902" y1="265" x2="1073" y2="265" stroke="#2CE0BF" stroke-opacity=".45" stroke-width="1" stroke-dasharray="2 3"/>
+          <!-- Lead — emphasized -->
+          <circle cx="1085" cy="265" r="4.5" fill="#2CE0BF"/>
+          <circle cx="1085" cy="265" r="9" fill="none" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1"/>
+          <circle cx="1085" cy="265" r="14" fill="none" stroke="#2CE0BF" stroke-opacity=".15" stroke-width="1"/>
+        </g>
+
+        <!-- Rising capability curves — editorial, layered -->
+        <path d="M 60 255 C 240 240, 380 225, 540 200 S 820 140, 1140 85"
+              stroke="url(#curveGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 60 265 C 260 258, 420 250, 600 225 S 880 170, 1140 115"
+              stroke="url(#curveGrad2)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="1 5"/>
+
+        <!-- Shaded area under primary curve -->
+        <path d="M 60 255 C 240 240, 380 225, 540 200 S 820 140, 1140 85 L 1140 245 L 60 245 Z"
+              fill="#5D36FF" fill-opacity=".10"/>
+
+        <!-- ================= COMPOSITION: team + AI nodes ================= -->
+
+        <!-- Left cluster: two professionals collaborating -->
+        <!-- Person A -->
+        <g transform="translate(125,170)">
+          <!-- desk/base plate -->
+          <rect x="-28" y="68" width="56" height="4" rx="2" fill="#ffffff" fill-opacity=".10"/>
+          <!-- body -->
+          <path d="M -22 68 C -22 48, -14 40, 0 40 C 14 40, 22 48, 22 68 Z" fill="#B894FF" fill-opacity=".75"/>
+          <!-- head -->
+          <circle cx="0" cy="22" r="13" fill="#E2D8FF"/>
+          <!-- laptop glow -->
+          <rect x="-10" y="56" width="20" height="10" rx="1.5" fill="#2CE0BF" fill-opacity=".85"/>
+          <rect x="-11" y="65" width="22" height="2" rx="1" fill="#ffffff" fill-opacity=".35"/>
+        </g>
+
+        <!-- Person B -->
+        <g transform="translate(205,180)">
+          <rect x="-28" y="58" width="56" height="4" rx="2" fill="#ffffff" fill-opacity=".10"/>
+          <path d="M -22 58 C -22 38, -14 30, 0 30 C 14 30, 22 38, 22 58 Z" fill="#7858FF" fill-opacity=".85"/>
+          <circle cx="0" cy="14" r="12" fill="#E2D8FF"/>
+          <rect x="-9" y="46" width="18" height="9" rx="1.5" fill="#89D1FF" fill-opacity=".85"/>
+          <rect x="-10" y="54" width="20" height="2" rx="1" fill="#ffffff" fill-opacity=".35"/>
+        </g>
+
+        <!-- Connection between people -->
+        <line x1="148" y1="195" x2="182" y2="192" stroke="#2CE0BF" stroke-opacity=".5" stroke-width="1" stroke-dasharray="2 3"/>
+
+        <!-- Learning path node from left cluster -->
+        <g transform="translate(290,130)">
+          <circle r="22" fill="#ffffff" fill-opacity=".06" stroke="#B894FF" stroke-opacity=".45" stroke-width="1"/>
+          <!-- book / learning glyph -->
+          <path d="M -9 -5 L 9 -5 L 9 7 L 0 4 L -9 7 Z" fill="#B894FF" fill-opacity=".85"/>
+          <path d="M -9 -5 L 0 -2 L 9 -5" stroke="#ffffff" stroke-opacity=".5" stroke-width="1" fill="none"/>
+        </g>
+        <text x="290" y="172" fill="#ffffff" fill-opacity=".82" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2" text-anchor="middle">LEARNING</text>
+
+        <!-- Connecting lines across the composition -->
+        <path d="M 228 170 Q 258 150, 290 130" stroke="#B894FF" stroke-opacity=".4" stroke-width="1" fill="none"/>
+        <path d="M 290 130 Q 380 110, 460 125" stroke="#B894FF" stroke-opacity=".35" stroke-width="1" fill="none" stroke-dasharray="2 3"/>
+
+        <!-- Center: AI core node (hexagonal) -->
+        <g transform="translate(600,175)">
+          <!-- outer ring -->
+          <circle r="54" fill="none" stroke="#2CE0BF" stroke-opacity=".25" stroke-width="1"/>
+          <circle r="42" fill="none" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1" stroke-dasharray="1 4"/>
+          <!-- hexagon core -->
+          <polygon points="0,-28 24,-14 24,14 0,28 -24,14 -24,-14"
+                   fill="#1C0C6E" stroke="#2CE0BF" stroke-width="1.5"/>
+          <polygon points="0,-28 24,-14 24,14 0,28 -24,14 -24,-14"
+                   fill="url(#nodeGlow)" opacity=".6"/>
+          <!-- inner glyph: AI spark -->
+          <g fill="#2CE0BF">
+            <circle cx="0" cy="0" r="3"/>
+            <path d="M 0 -14 L 0 -8 M 0 8 L 0 14 M -14 0 L -8 0 M 8 0 L 14 0"
+                  stroke="#2CE0BF" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M -10 -10 L -6 -6 M 10 -10 L 6 -6 M -10 10 L -6 6 M 10 10 L 6 6"
+                  stroke="#2CE0BF" stroke-opacity=".6" stroke-width="1" stroke-linecap="round"/>
+          </g>
+          <text y="56" fill="#ffffff" fill-opacity=".92" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="800" letter-spacing="3" text-anchor="middle">AI CORE</text>
+        </g>
+
+        <!-- Satellite nodes around AI core -->
+        <!-- Knowledge node -->
+        <g transform="translate(460,125)">
+          <circle r="16" fill="#ffffff" fill-opacity=".08" stroke="#89D1FF" stroke-opacity=".5" stroke-width="1"/>
+          <!-- document glyph -->
+          <rect x="-5" y="-6" width="10" height="12" rx="1" fill="#89D1FF" fill-opacity=".85"/>
+          <line x1="-3" y1="-3" x2="3" y2="-3" stroke="#1C0C6E" stroke-width=".8"/>
+          <line x1="-3" y1="0" x2="3" y2="0" stroke="#1C0C6E" stroke-width=".8"/>
+          <line x1="-3" y1="3" x2="1" y2="3" stroke="#1C0C6E" stroke-width=".8"/>
+        </g>
+        <text x="460" y="158" fill="#ffffff" fill-opacity=".82" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8" text-anchor="middle">KNOWLEDGE</text>
+
+        <!-- Insights node -->
+        <g transform="translate(740,125)">
+          <circle r="16" fill="#ffffff" fill-opacity=".08" stroke="#2CE0BF" stroke-opacity=".5" stroke-width="1"/>
+          <!-- chart glyph -->
+          <polyline points="-5,4 -2,-2 1,1 5,-4" fill="none" stroke="#2CE0BF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="-5" cy="4" r="1.3" fill="#2CE0BF"/>
+          <circle cx="5" cy="-4" r="1.3" fill="#2CE0BF"/>
+        </g>
+        <text x="740" y="158" fill="#ffffff" fill-opacity=".82" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8" text-anchor="middle">INSIGHTS</text>
+
+        <!-- Workspace / Assistant nodes removed to make room for maturity progression band -->
+
+        <!-- Connection lines core → satellites -->
+        <g stroke-opacity=".4" stroke-width="1" fill="none">
+          <line x1="565" y1="155" x2="475" y2="135" stroke="#89D1FF"/>
+          <line x1="635" y1="155" x2="725" y2="135" stroke="#2CE0BF"/>
+        </g>
+
+        <!-- Right cluster: team receiving AI capabilities -->
+        <!-- Person C -->
+        <g transform="translate(895,185)">
+          <rect x="-28" y="55" width="56" height="4" rx="2" fill="#ffffff" fill-opacity=".10"/>
+          <path d="M -22 55 C -22 35, -14 27, 0 27 C 14 27, 22 35, 22 55 Z" fill="#7858FF" fill-opacity=".85"/>
+          <circle cx="0" cy="12" r="12" fill="#E2D8FF"/>
+          <rect x="-9" y="43" width="18" height="9" rx="1.5" fill="#2CE0BF" fill-opacity=".85"/>
+          <rect x="-10" y="51" width="20" height="2" rx="1" fill="#ffffff" fill-opacity=".35"/>
+        </g>
+
+        <!-- Person D -->
+        <g transform="translate(975,170)">
+          <rect x="-30" y="70" width="60" height="4" rx="2" fill="#ffffff" fill-opacity=".10"/>
+          <path d="M -24 70 C -24 48, -15 40, 0 40 C 15 40, 24 48, 24 70 Z" fill="#B894FF" fill-opacity=".75"/>
+          <circle cx="0" cy="22" r="14" fill="#E2D8FF"/>
+          <rect x="-11" y="58" width="22" height="10" rx="1.5" fill="#89D1FF" fill-opacity=".9"/>
+          <rect x="-12" y="67" width="24" height="2" rx="1" fill="#ffffff" fill-opacity=".35"/>
+        </g>
+
+        <!-- Person E (smaller, behind) -->
+        <g transform="translate(1055,195)" opacity=".7">
+          <path d="M -18 48 C -18 32, -11 26, 0 26 C 11 26, 18 32, 18 48 Z" fill="#7858FF" fill-opacity=".7"/>
+          <circle cx="0" cy="14" r="10" fill="#E2D8FF" fill-opacity=".85"/>
+        </g>
+
+        <!-- Connections from AI core to right team -->
+        <path d="M 654 175 Q 760 170, 880 195" stroke="#2CE0BF" stroke-opacity=".5" stroke-width="1" fill="none"/>
+        <path d="M 654 175 Q 800 160, 955 180" stroke="#B894FF" stroke-opacity=".4" stroke-width="1" fill="none" stroke-dasharray="2 3"/>
+
+        <!-- Signal pulses along the main curve -->
+        <g fill="#2CE0BF">
+          <circle cx="365" cy="223" r="2.5" opacity=".7"/>
+          <circle cx="680" cy="170" r="3" opacity=".9"/>
+          <circle cx="920" cy="125" r="2.5" opacity=".7"/>
+        </g>
+
+        <!-- Subtle floating data particles -->
+        <g fill="#89D1FF" fill-opacity=".45">
+          <rect x="360" y="90" width="2" height="2"/>
+          <rect x="520" y="70" width="2" height="2"/>
+          <rect x="820" y="95" width="2" height="2"/>
+          <rect x="1070" y="125" r="1" width="2" height="2"/>
+        </g>
+        <g fill="#B894FF" fill-opacity=".4">
+          <rect x="200" y="95" width="2" height="2"/>
+          <rect x="860" y="70" width="2" height="2"/>
+          <rect x="1100" y="200" width="2" height="2"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="ai-stories-grid">
+
+      <!-- AI Maturity feature — full-width editorial article -->
+      <article class="ai-feature-card">
+        <div class="story-card-accent indigo"></div>
+        <div class="story-card-body">
+          <div class="story-card-eyebrow"><span class="tag tp-indigo">AI AT SIGNAVIO</span></div>
+          <h2 class="story-card-title">AI at Signavio: Celebrating our growth and taking the next steps</h2>
+          <p class="story-card-summary">Let's take a moment to celebrate what we've achieved this year. The way we work has genuinely changed across all functions: exploring ideas faster, collaborating on prototypes, automating recurring tasks, and finding new ways to create value. Code Camp made it visible, but it's been happening everywhere. Thank you for the curiosity, experimentation, and learning.</p>
+          <p class="story-card-summary">As you've all pushed the limits so far, the feeling of being behind hasn't completely vanished. That's why we've updated the AI maturity quiz and our role-specific AI proficiency expectations—to help you build the skills you need as the landscape evolves and expectations change.</p>
+        </div>
+        <div class="story-card-footer">
+          <a href="https://pages.github.tools.sap/SAP-Signavio-T-A/AIccelerator/" class="btn btn-primary btn-sm btn-arrow">Retake the AI Maturity Quiz</a>
+          <button class="btn-expand" aria-controls="expand-aiquiz" aria-expanded="false"><span class="expand-text">Read More</span> <i class="expand-arrow">▾</i></button>
+        </div>
+        <div class="expand-panel" id="expand-aiquiz" role="region">
+          <div class="expand-body">
+            <p class="ai-ambition-lead">Our shared ambition for 2026:</p>
+            <div class="ai-pullquote">
+              <p>“By end of 2026, &gt;80% of SAP Signavio P&amp;E employees identify as proficient AI practitioners.”</p>
+            </div>
+
+            <p>This helps us understand whether our AI enablement efforts are helping colleagues apply AI confidently in their roles and where more support is needed. It is a collective learning ambition judged by managers' assessment of their overall team achievements.</p>
+
+            <h3 class="ai-cta-heading">Call to action</h3>
+            <p>Take 5 minutes by the end of November to revisit the AI maturity quiz (voluntary and private), reflect on your progress and discuss your needs and next steps with your manager. We encourage everyone to participate and would also love your feedback on what learning support you need and how we can improve the Hub.</p>
+
+            <div class="ai-resources">
+              <div class="ai-resources-label">Resources</div>
+              <div class="ai-resources-grid">
+                <a class="ai-resource-card" href="https://pages.github.tools.sap/SAP-Signavio-T-A/AIccelerator/">
+                  <span class="ai-resource-icon" aria-hidden="true">◎</span>
+                  <div class="ai-resource-body">
+                    <h4 class="ai-resource-title">AI Maturity Quiz</h4>
+                  </div>
+                  <span class="ai-resource-arrow" aria-hidden="true">›</span>
+                </a>
+                <a class="ai-resource-card" href="https://sap.sharepoint.com/sites/201763/SitePages/My-AI-journey-at-SAP-Signavio.aspx?isSPOFile=1&amp;TeamsCID=7be90c71-2b87-4e28-888f-397a869c207c&amp;OR=Teams-HL&amp;CT=1794820213502&amp;linkOpenTime=1794820213542">
+                  <span class="ai-resource-icon" aria-hidden="true">↗</span>
+                  <div class="ai-resource-body">
+                    <h4 class="ai-resource-title">My AI Journey at SAP Signavio</h4>
+                    <p class="ai-resource-note">Launch May 2026</p>
+                  </div>
+                  <span class="ai-resource-arrow" aria-hidden="true">›</span>
+                </a>
+                <a class="ai-resource-card" href="https://sap.sharepoint.com/sites/201763/SitePages/AI-and-AI-Agents.aspx">
+                  <span class="ai-resource-icon" aria-hidden="true">⌘</span>
+                  <div class="ai-resource-body">
+                    <h4 class="ai-resource-title">AI Links You Need to Know</h4>
+                  </div>
+                  <span class="ai-resource-arrow" aria-hidden="true">›</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: AIPOM & FRONTRUNNER
+     Source: Content_.docx lines 036–046
+     ============================================================ -->
+<section id="aipom" class="section">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-label">AIPOM &amp; FRONTRUNNER</div>
+      <h2 class="section-title">What's Happening with AIPOM</h2>
+    </div>
+    <!-- Full-width single-column card -->
+    <div class="aipom-card">
+      <div class="aipom-card-accent"></div>
+      <div class="aipom-card-main">
+        <div class="aipom-card-eyebrow">AIPOM &amp; FRONTRUNNER</div>
+        <h2 class="aipom-card-title">What's Happening with AIPOM</h2>
+        <div class="aipom-card-lede">First off: Thank You.</div>
+        <div class="aipom-card-intro">
+          <p>If you completed the <span class="pill">HPOM Pulse Check</span>, thank you. Your feedback directly informs our <span class="pill pill-indigo">Frontrunner</span> work and helps shape what comes next. It gives us valuable insight into what's working well, where teams need more support, and how we can continue improving together.</p>
+        </div>
+      </div>
+      <div class="aipom-card-actions">
+        <a href="https://sap.sharepoint.com/sites/209119" class="btn btn-secondary btn-sm btn-arrow">AIPOM SharePoint</a>
+        <button class="btn-expand" aria-controls="expand-aipom" aria-expanded="false"><span class="expand-text">Read More</span> <i class="expand-arrow">▾</i></button>
+      </div>
+      <div class="aipom-expand-body">
+        <div class="expand-panel" id="expand-aipom" role="region">
+          <div class="expand-body">
+            <h3 class="aipom-sub">FIT is one of 13. And things are moving.</h3>
+            <p>Across SAP, there are 13 Frontrunners and FIT is one of them. Our Frontrunner is currently running with eight pods and is now in week five of setup. Teams are learning quickly, testing new ways of working, and capturing insights along the way. We'll continue sharing updates as the work evolves.</p>
+
+            <h3 class="aipom-sub">Need to find something?</h3>
+            <p>The AIPOM SharePoint remains the central place for everything related to AIPOM and Frontrunner. One place. One source of information. Easy to find when you need it.</p>
+            <p>Go to <a href="https://sap.sharepoint.com/sites/209119" class="pill pill-teal pill-link">Evolution of our Product Operating Model</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: UPCOMING EVENTS & REPLAYS
+     Source: Content_.docx lines 000–024
+     ============================================================ -->
+<hr class="section-divider teal">
+<section id="events" class="section">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-label">EVENTS</div>
+      <h2 class="section-title">Upcoming Events &amp; Replays</h2>
+    </div>
+
+    <!-- UPCOMING -->
+    <div class="section-subheader" style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);">UPCOMING</div>
+
+    <!-- Product Insights Day — featured -->
+    <!-- Source: Content_.docx lines 022–024 + Product insights days_.pptx slides 2, 3, 12 -->
+    <div class="pid-featured">
+      <div class="pid-accent-bar"></div>
+      <div class="pid-image-strip" role="img" aria-label="Editorial illustration: Product Insights Day — customer signals flowing into insights, decisions and outcomes, with cross-functional product, engineering and UX collaboration.">
+        <svg viewBox="-150 20 1440 265" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="pidBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#001233"/>
+              <stop offset="55%" stop-color="#002A86"/>
+              <stop offset="100%" stop-color="#0070F2"/>
+            </linearGradient>
+            <linearGradient id="pidFlow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"  stop-color="#1B90FF" stop-opacity=".6"/>
+              <stop offset="50%" stop-color="#89D1FF" stop-opacity=".8"/>
+              <stop offset="100%" stop-color="#2CE0BF" stop-opacity=".9"/>
+            </linearGradient>
+            <linearGradient id="pidStageTop" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".09"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity=".02"/>
+            </linearGradient>
+            <radialGradient id="pidPulseGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stop-color="#2CE0BF" stop-opacity=".55"/>
+              <stop offset="60%" stop-color="#2CE0BF" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="pidAmbientBlue" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stop-color="#1B90FF" stop-opacity=".45"/>
+              <stop offset="60%" stop-color="#1B90FF" stop-opacity="0"/>
+            </radialGradient>
+            <pattern id="pidDotGrid" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#ffffff" fill-opacity=".05"/>
+            </pattern>
+          </defs>
+
+          <!-- Base -->
+          <rect x="-150" y="20" width="1440" height="265" fill="url(#pidBg)"/>
+          <rect x="-150" y="20" width="1440" height="265" fill="url(#pidDotGrid)"/>
+
+          <!-- Soft atmospheric halos -->
+          <circle cx="120" cy="120" r="180" fill="url(#pidAmbientBlue)"/>
+          <circle cx="1060" cy="230" r="200" fill="url(#pidPulseGlow)"/>
+
+          <!-- Editorial kickers -->
+          <text x="60" y="56" fill="#ffffff" fill-opacity=".48" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="3.5">EVIDENCE · CUSTOMER INSIGHTS · PRODUCT SIGNALS</text>
+          <line x1="60" y1="70" x2="420" y2="70" stroke="#ffffff" stroke-opacity=".14" stroke-width="1"/>
+          <text x="1140" y="56" fill="#89D1FF" fill-opacity=".68" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2.5" text-anchor="end">PRODUCT INSIGHTS DAY · NOV 2026</text>
+
+          <!-- ================= HORIZONTAL FLOW: 4 stages ================= -->
+
+          <!-- Spine line connecting stages (sits BEHIND stage boxes) -->
+          <line x1="155" y1="155" x2="1045" y2="155" stroke="url(#pidFlow)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Secondary dashed echo above the spine -->
+          <line x1="155" y1="149" x2="1045" y2="149" stroke="#89D1FF" stroke-opacity=".35" stroke-width="1" stroke-dasharray="1 5"/>
+
+          <!-- Signal pulses traveling along the spine -->
+          <g>
+            <circle cx="310" cy="155" r="3.5" fill="#2CE0BF"/>
+            <circle cx="310" cy="155" r="7" fill="none" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1"/>
+            <circle cx="610" cy="155" r="3.5" fill="#2CE0BF"/>
+            <circle cx="610" cy="155" r="7" fill="none" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1"/>
+            <circle cx="900" cy="155" r="3.5" fill="#2CE0BF"/>
+            <circle cx="900" cy="155" r="7" fill="none" stroke="#2CE0BF" stroke-opacity=".35" stroke-width="1"/>
+          </g>
+
+          <!-- ───────── STAGE 01 · CUSTOMER SIGNALS ───────── -->
+          <g transform="translate(155,155)">
+            <!-- stage frame -->
+            <rect x="-60" y="-50" width="120" height="100" rx="10"
+                  fill="url(#pidStageTop)" stroke="#89D1FF" stroke-opacity=".5" stroke-width="1"/>
+            <!-- stage number badge -->
+            <circle cx="-48" cy="-38" r="11" fill="#001233" stroke="#89D1FF" stroke-opacity=".6" stroke-width="1"/>
+            <text x="-48" y="-34" fill="#89D1FF" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="800" letter-spacing=".5" text-anchor="middle">01</text>
+            <!-- icon: speech bubble -->
+            <g transform="translate(0,-6)">
+              <path d="M -22 -12 L 22 -12 Q 28 -12 28 -5 L 28 7 Q 28 14 22 14 L -4 14 L -14 24 L -10 14 L -22 14 Q -28 14 -28 7 L -28 -5 Q -28 -12 -22 -12 Z"
+                    fill="#1B90FF" fill-opacity=".9" stroke="#89D1FF" stroke-opacity=".55" stroke-width="1"/>
+              <circle cx="-10" cy="1" r="1.8" fill="#001233"/>
+              <circle cx="0"   cy="1" r="1.8" fill="#001233"/>
+              <circle cx="10"  cy="1" r="1.8" fill="#001233"/>
+            </g>
+          </g>
+          <text x="155" y="226" fill="#ffffff" fill-opacity=".92" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="800" letter-spacing="2" text-anchor="middle">CUSTOMER SIGNALS</text>
+
+          <!-- Flow arrow 1→2 -->
+          <g transform="translate(240,155)" fill="#89D1FF" fill-opacity=".85">
+            <polygon points="0,-5 10,0 0,5"/>
+          </g>
+
+          <!-- ───────── STAGE 02 · INSIGHTS ───────── -->
+          <g transform="translate(455,155)">
+            <rect x="-60" y="-50" width="120" height="100" rx="10"
+                  fill="url(#pidStageTop)" stroke="#1B90FF" stroke-opacity=".55" stroke-width="1"/>
+            <circle cx="-48" cy="-38" r="11" fill="#001233" stroke="#1B90FF" stroke-opacity=".65" stroke-width="1"/>
+            <text x="-48" y="-34" fill="#89D1FF" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="800" letter-spacing=".5" text-anchor="middle">02</text>
+            <!-- icon: magnifying lens over bar chart -->
+            <g transform="translate(0,-4)">
+              <!-- bar chart behind -->
+              <rect x="-14" y="2"  width="4" height="10" rx="1" fill="#1B90FF" fill-opacity=".85"/>
+              <rect x="-7"  y="-3" width="4" height="15" rx="1" fill="#1B90FF" fill-opacity=".85"/>
+              <rect x="0"   y="-8" width="4" height="20" rx="1" fill="#2CE0BF"/>
+              <!-- lens -->
+              <circle cx="10" cy="-6" r="9" fill="none" stroke="#2CE0BF" stroke-width="1.8"/>
+              <circle cx="10" cy="-6" r="4" fill="#2CE0BF" fill-opacity=".25"/>
+              <line x1="16" y1="0" x2="22" y2="6" stroke="#2CE0BF" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </g>
+          <text x="455" y="226" fill="#ffffff" fill-opacity=".92" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="800" letter-spacing="2" text-anchor="middle">INSIGHTS</text>
+
+          <!-- Flow arrow 2→3 -->
+          <g transform="translate(540,155)" fill="#89D1FF" fill-opacity=".85">
+            <polygon points="0,-5 10,0 0,5"/>
+          </g>
+
+          <!-- ───────── STAGE 03 · DECISIONS ───────── -->
+          <g transform="translate(755,155)">
+            <rect x="-60" y="-50" width="120" height="100" rx="10"
+                  fill="url(#pidStageTop)" stroke="#2CE0BF" stroke-opacity=".55" stroke-width="1"/>
+            <circle cx="-48" cy="-38" r="11" fill="#001233" stroke="#2CE0BF" stroke-opacity=".65" stroke-width="1"/>
+            <text x="-48" y="-34" fill="#2CE0BF" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="800" letter-spacing=".5" text-anchor="middle">03</text>
+            <!-- icon: decision tree / forking paths -->
+            <g transform="translate(0,-4)" stroke="#2CE0BF" stroke-width="1.6" fill="none" stroke-linecap="round">
+              <!-- origin node -->
+              <circle cx="-14" cy="0" r="3.5" fill="#2CE0BF"/>
+              <!-- upper branch -->
+              <line x1="-11" y1="-1.5" x2="6" y2="-10"/>
+              <circle cx="10" cy="-12" r="3" fill="#001233" stroke="#2CE0BF"/>
+              <!-- middle branch -->
+              <line x1="-10" y1="0" x2="6" y2="0"/>
+              <circle cx="10" cy="0" r="3" fill="#2CE0BF"/>
+              <!-- lower branch -->
+              <line x1="-11" y1="1.5" x2="6" y2="10"/>
+              <circle cx="10" cy="12" r="3" fill="#001233" stroke="#2CE0BF"/>
+            </g>
+          </g>
+          <text x="755" y="226" fill="#ffffff" fill-opacity=".92" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="800" letter-spacing="2" text-anchor="middle">DECISIONS</text>
+
+          <!-- Flow arrow 3→4 -->
+          <g transform="translate(840,155)" fill="#2CE0BF" fill-opacity=".9">
+            <polygon points="0,-5 10,0 0,5"/>
+          </g>
+
+          <!-- ───────── STAGE 04 · OUTCOMES ───────── -->
+          <g transform="translate(1045,155)">
+            <rect x="-60" y="-50" width="120" height="100" rx="10"
+                  fill="url(#pidStageTop)" stroke="#2CE0BF" stroke-opacity=".7" stroke-width="1.2"/>
+            <!-- subtle outer glow -->
+            <rect x="-62" y="-52" width="124" height="104" rx="11"
+                  fill="none" stroke="#2CE0BF" stroke-opacity=".2" stroke-width="2"/>
+            <circle cx="-48" cy="-38" r="11" fill="#001233" stroke="#2CE0BF" stroke-opacity=".8" stroke-width="1"/>
+            <text x="-48" y="-34" fill="#2CE0BF" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="800" letter-spacing=".5" text-anchor="middle">04</text>
+            <!-- icon: rising trend with star -->
+            <g transform="translate(0,-4)">
+              <polyline points="-18,8 -9,0 -2,5 8,-8 18,-14"
+                        fill="none" stroke="#2CE0BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,-14 18,-14 18,-10"
+                        fill="none" stroke="#2CE0BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- star accent -->
+              <path d="M 18 -14 L 20 -10 L 24 -10 L 21 -7 L 22 -3 L 18 -5 L 14 -3 L 15 -7 L 12 -10 L 16 -10 Z"
+                    fill="#2CE0BF" fill-opacity=".45"/>
+            </g>
+          </g>
+          <text x="1045" y="226" fill="#ffffff" fill-opacity=".95" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="800" letter-spacing="2" text-anchor="middle">OUTCOMES</text>
+
+          <!-- ================= COLLABORATION LAYER (behind stages, lower-center): 3 cross-functional professionals ================= -->
+          <!-- tiny figures below the spine, suggesting PM/ENG/UX collaboration — placed OUTSIDE stage boxes -->
+          <g opacity=".75">
+            <!-- Figure left -->
+            <g transform="translate(330,245)">
+              <path d="M -10 0 C -10 -10, -6 -14, 0 -14 C 6 -14, 10 -10, 10 0 Z" fill="#B894FF" fill-opacity=".8"/>
+              <circle cx="0" cy="-20" r="6" fill="#E2D8FF"/>
+            </g>
+            <!-- Figure center -->
+            <g transform="translate(610,250)">
+              <path d="M -11 0 C -11 -11, -7 -16, 0 -16 C 7 -16, 11 -11, 11 0 Z" fill="#89D1FF" fill-opacity=".85"/>
+              <circle cx="0" cy="-22" r="7" fill="#E2D8FF"/>
+            </g>
+            <!-- Figure right -->
+            <g transform="translate(890,245)">
+              <path d="M -10 0 C -10 -10, -6 -14, 0 -14 C 6 -14, 10 -10, 10 0 Z" fill="#2CE0BF" fill-opacity=".85"/>
+              <circle cx="0" cy="-20" r="6" fill="#C2FCEE"/>
+            </g>
+          </g>
+
+          <!-- Collaboration dashed arcs between figures -->
+          <g stroke-opacity=".3" stroke-width="1" fill="none" stroke-dasharray="2 3">
+            <path d="M 342 230 Q 475 210, 598 230" stroke="#89D1FF"/>
+            <path d="M 621 230 Q 755 210, 878 230" stroke="#2CE0BF"/>
+          </g>
+
+          <!-- Floating data particles (subtle) -->
+          <g fill="#89D1FF" fill-opacity=".45">
+            <rect x="80"   y="90" width="2" height="2"/>
+            <rect x="420"  y="80" width="2" height="2"/>
+            <rect x="740"  y="95" width="2" height="2"/>
+            <rect x="1080" y="90" width="2" height="2"/>
+          </g>
+          <g fill="#2CE0BF" fill-opacity=".4">
+            <rect x="250"  y="100" width="2" height="2"/>
+            <rect x="880"  y="75" width="2" height="2"/>
+          </g>
+        </svg>
+      </div>
+      <div class="pid-card-body">
+        <div class="pid-card-eyebrow">
+          <span class="pid-chip-featured">Featured Event</span>
+          <div class="pid-date-badges">
+            <span class="pid-date-badge virtual" title="17 Nov · Virtual"><span class="pid-date-day">17</span><span class="pid-date-month">NOV</span></span>
+            <span class="pid-date-badge onsite"  title="18 Nov · St. Leon-Rot"><span class="pid-date-day">18</span><span class="pid-date-month">NOV</span></span>
+            <span class="pid-date-badge virtual" title="19 Nov · Virtual"><span class="pid-date-day">19</span><span class="pid-date-month">NOV</span></span>
+            <span class="pid-date-badge virtual" title="24 Nov · Virtual"><span class="pid-date-day">24</span><span class="pid-date-month">NOV</span></span>
+            <span class="pid-date-badge onsite"  title="25 Nov · Bengaluru"><span class="pid-date-day">25</span><span class="pid-date-month">NOV</span></span>
+          </div>
+        </div>
+        <h2 class="pid-card-title">Product Insights Day 2026</h2>
+        <p class="pid-card-summary">Product Insights Day brings together Product Management, Engineering, UX, Adoption, AI and Decision-Making communities to explore how customer insights, product signals and evidence-based decisions help create better product outcomes.</p>
+      </div>
+      <div class="pid-card-footer">
+        <a href="https://sap.sharepoint.com/sites/208197/SitePages/Product-Insights-Day-2026.aspx?csf=1&web=1&e=JfZAB3&isSPOFile=1&OR=Teams-HL&CT=1777899717909&linkOpenTime=1777899717937&CID=1a5410a2-3039-0001-fcd3-08d05943d161&cidOR=SPO"
+           class="btn btn-primary btn-sm btn-arrow">Register</a>
+        <a href="https://sap.sharepoint.com/sites/208197/SitePages/Product-Insights-Day-2026.aspx?csf=1&web=1&e=JfZAB3&isSPOFile=1&OR=Teams-HL&CT=1777899717909&linkOpenTime=1777899717937&CID=1a5410a2-3039-0001-fcd3-08d05943d161&cidOR=SPO"
+           class="btn btn-secondary btn-sm">Product Insights Day SharePoint Page</a>
+        <button class="btn-expand" aria-controls="expand-pid" aria-expanded="false"><span class="expand-text">Read More</span> <i class="expand-arrow">▾</i></button>
+      </div>
+      <div class="expand-panel" id="expand-pid" role="region">
+        <div class="expand-body">
+
+          <!-- Audience -->
+          <div class="pid-expand-audience">
+            <div class="pid-expand-section-label">Who should attend</div>
+            <div class="pid-audience-chips">
+              <span class="pid-audience-chip aud-pm">Product Management</span>
+              <span class="pid-audience-chip aud-eng">Engineering</span>
+              <span class="pid-audience-chip aud-ux">User Experience</span>
+              <span class="pid-audience-chip aud-adopt">Adoption &amp; PX</span>
+              <span class="pid-audience-chip aud-dec">Decision Makers</span>
+            </div>
+          </div>
+
+          <!-- Why / What / How -->
+          <div class="pid-expand-section-label">What to expect</div>
+          <div class="pid-pillars">
+            <div class="pid-pillar why">
+              <div class="pid-pillar-header">
+                <span class="pid-pillar-icon" aria-hidden="true">?</span>
+                <div class="pid-pillar-label">Why</div>
+              </div>
+              <p class="pid-pillar-text">Building an Autonomous Enterprise requires evidence-based, customer-centric decisions. AI is changing how products are built and how teams decide.</p>
+            </div>
+            <div class="pid-pillar what">
+              <div class="pid-pillar-header">
+                <span class="pid-pillar-icon" aria-hidden="true">◆</span>
+                <div class="pid-pillar-label">What</div>
+              </div>
+              <p class="pid-pillar-text">Turn product signals into insights and outcomes. Connect market, customer and product data to build a complete view of performance.</p>
+            </div>
+            <div class="pid-pillar how">
+              <div class="pid-pillar-header">
+                <span class="pid-pillar-icon" aria-hidden="true">›</span>
+                <div class="pid-pillar-label">How</div>
+              </div>
+              <p class="pid-pillar-text">Keynotes, customer perspectives, real examples and hands-on learning across virtual and onsite sessions.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- P&E End of Year Meeting -->
+    <!-- Source: Content_.docx lines 018–020 -->
+    <div class="events-subgrid" style="grid-template-columns:1fr;margin-bottom:2rem">
+      <article class="event-card">
+        <div class="event-card-stripe blue"></div>
+        <div class="event-card-body">
+          <div class="event-chip blue">DEC 10 · UPCOMING</div>
+          <h3 class="event-title">SAP Signavio P&amp;E End of Year Meeting</h3>
+          <p class="event-description">December 10 at 4 p.m. CET</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- REPLAYS & RECORDINGS -->
+    <div class="section-subheader" style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);">REPLAYS &amp; RECORDINGS</div>
+
+    <div class="replay-grid">
+
+      <!-- Discovery Series — Horizon -->
+      <!-- Source: Content_.docx lines 002–007 -->
+      <article class="event-card">
+        <div class="event-card-stripe indigo"></div>
+        <div class="event-card-body">
+          <div class="event-chip indigo">REPLAY AVAILABLE</div>
+          <h3 class="event-title">Discovery Series — Horizon: NS2. BTP. MPC. OMG.</h3>
+          <p class="event-description">If "When is the RTC on NS2 CRE? Before or after FedRAMP?" just made you go "huh?", we have just the recording for you.</p>
+          <div class="expand-panel" id="expand-horizon" role="region">
+            <div class="expand-body">
+              <p>As part of the Signavio Discovery Series, Jen and Vitaly helped Signavio understand the secret language of Horizon. Knowledge, misconceptions and a few dragons in space.</p>
+            </div>
+          </div>
+          <div class="event-actions">
+            <a href="https://sap.sharepoint.com/sites/201763/SitePages/SAP-Signavio-P&E-Discovery-Series.aspx?d=w888ed2a41c25439e85fddaace7ac6782&csf=1&web=1&e=C5eeNf&CID=7d804c8b-2cc6-40d4-8c1c-359d3eaa2e91#16.10-horizon-ns2.-btp.-mpc.-omg." class="btn btn-secondary btn-sm btn-arrow">Watch Replay</a>
+            <a href="https://app.mural.co/t/sapsignavio0592/m/sapsignavio0592/1792066579346/d9589e532db671bd71f5937742ce0c46ff259c11" class="btn btn-ghost btn-sm">Mural Board</a>
+            <button class="btn-expand" aria-controls="expand-horizon" aria-expanded="false"><span class="expand-text">Read More</span> <i class="expand-arrow">▾</i></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- TechEd Replay -->
+      <!-- Source: Content_.docx lines 009–015 -->
+      <article class="event-card">
+        <div class="event-card-stripe teal"></div>
+        <div class="event-card-body">
+          <div class="event-chip teal">REPLAY AVAILABLE</div>
+          <h3 class="event-title">SAP TechEd — Opening Keynote &amp; Sessions</h3>
+          <p class="event-description">Missed SAP TechEd? The Opening Keynote replay is available, plus slides, demos, and all sessions on demand.</p>
+          <div class="event-actions">
+            <a href="https://www.youtube.com/watch?v=PvSU8FyNcwA" class="btn btn-secondary btn-sm">Replay</a>
+            <a href="https://dam.sap.com/mac/app/cs/event/e00cf096fed43287857e77acee536bf55cd9ad09" class="btn btn-ghost btn-sm">Slides</a>
+            <a href="https://dam.sap.com/mac/app/cs/event/e00cf096fed43287857e77acee536bf55cd9ad09" class="btn btn-ghost btn-sm">Demos</a>
+            <a href="https://www.sap.com/events/teched/virtual/flow/sap/tev26/catalog/page/catalog?tab.sessionplanned=1692641568884001cZ9d" class="btn btn-secondary btn-sm btn-arrow">Sessions On Demand</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: NEWS FROM SIGNAVIO EXPERIENCE
+     Source: Content_.docx lines 028–034
+     ============================================================ -->
+<hr class="section-divider blue">
+<section id="experience" class="section">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-label">NEWS FROM SIGNAVIO EXPERIENCE</div>
+      <h2 class="section-title">Designing at the Summit</h2>
+    </div>
+
+    <!-- Feature article card -->
+    <div class="stes-card">
+
+      <!-- Image strip — outside expand, never moves -->
+      <div class="stes-img-strip">
+        <img src="https://sap-my.sharepoint.com/personal/desiree_cantuaria_sap_com/Documents/Apps/Microsoft%20Forms/Submit%20your%20news%20for%20the%20SAP%20Signavio%20P%26E%20newslett/Question/STES_collage_Alina%20Efimova.png"
+             alt="SAP Signavio Experience team at the Transformation Excellence Summit Berlin"
+             onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#D1EFFF,#E2D8FF)'">
+      </div>
+
+      <!-- Article body -->
+      <div class="stes-body">
+        <span class="stes-eyebrow">News from Signavio Experience</span>
+        <h3 class="stes-title">Designing at the Summit: How the SAP Signavio Experience Team Brought UX Research to the Transformation Excellence Summit in Berlin</h3>
+        <p class="stes-summary">At the Berlin Transformation Excellence Summit, the SAP Signavio Experience team ran a live Usability Lab: 36 sessions across 4 research projects with ~175 customers in 1.5 days. Demand exceeded all capacity.</p>
+      </div>
+
+      <!-- Expand panel — sits BETWEEN article and actions so expanded body appears before the CTA -->
+      <div class="expand-panel" id="expand-stes" role="region">
+        <div class="expand-body" style="border-top-color:#D8EFB8">
+          <p>At the Berlin Transformation Excellence Summit, the SAP Signavio Experience team ran a live Usability Lab: 36 sessions across 4 research projects with ~175 customers in 1.5 days. Demand exceeded all capacity. The results: 4.35/5 satisfaction score, numerous actionable insights, 20+ on-the-spot SAP Research Panel sign-ups. Customers praised the facilitation and the rare chance to shape real product decisions — with AI-crafted prototypes so polished, many thought they were using the live product.</p>
+        </div>
+      </div>
+
+      <!-- Actions footer — Event page CTA + Read More/Less -->
+      <div class="stes-footer">
+        <a href="https://www.signavio.com/events/sap-transformation-excellence-summit-2026/berlin" class="btn btn-secondary btn-sm btn-arrow">SAP Transformation Excellence Summit Berlin Page</a>
+        <button class="btn-expand" aria-controls="expand-stes" aria-expanded="false"><span class="expand-text">Read More</span> <i class="expand-arrow">▾</i></button>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER CTA + FOOTER BAR
+     ============================================================ -->
+<section class="footer-cta">
+  <div class="wrap">
+    <div class="footer-cta-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="footer-cta-col">
+        <p class="footer-cta-col-text">Product Insights Day — Nov 17–25. Virtual and onsite in St. Leon-Rot and Bengaluru.</p>
+        <a href="https://sap.sharepoint.com/sites/208197/SitePages/Product-Insights-Day-2026.aspx?csf=1&web=1&e=JfZAB3&isSPOFile=1&OR=Teams-HL&CT=1777899717909&linkOpenTime=1777899717937&CID=1a5410a2-3039-0001-fcd3-08d05943d161&cidOR=SPO" class="btn btn-white-outline">Register for Product Insights Day</a>
+      </div>
+      <div class="footer-cta-col">
+        <p class="footer-cta-col-text">Where are you on your AI journey? The updated maturity quiz takes 5 minutes and results stay private.</p>
+        <a href="https://pages.github.tools.sap/SAP-Signavio-T-A/AIccelerator/" class="btn btn-white-outline">Retake the AI Quiz</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer-bar">
+  <div class="wrap">
+    <div class="footer-bar-inner">
+      <div class="footer-bar-left">
+        <div class="footer-bar-name">The Stack — SAP Signavio P&amp;E News · November 2026</div>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="https://sap.sharepoint.com/sites/208197/SitePages/Product-Insights-Day-2026.aspx?csf=1&web=1&e=JfZAB3&isSPOFile=1&OR=Teams-HL&CT=1777899717909&linkOpenTime=1777899717937&CID=1a5410a2-3039-0001-fcd3-08d05943d161&cidOR=SPO">Product Insights Day</a>
+        <a href="https://pages.github.tools.sap/SAP-Signavio-T-A/AIccelerator/">AI.ccelerate Hub</a>
+        <a href="https://sap.sharepoint.com/sites/201763/SitePages/AI-and-AI-Agents.aspx">AI &amp; AI Agents</a>
+      </nav>
+      <div class="footer-legal">&copy; 2026 SAP SE. The Stack is an internal publication of SAP Signavio Product &amp; Engineering.</div>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+(function(){
+  'use strict';
+
+  /* Ticker — duplicate items for seamless loop */
+  var track = document.getElementById('tickerTrack');
+  if(track){ track.innerHTML = track.innerHTML + track.innerHTML; }
+
+  /* Sticky nav — active link via IntersectionObserver */
+  var navLinks = document.querySelectorAll('.nav-link');
+  var sectionIds = Array.from(navLinks).map(function(l){ return l.getAttribute('href').replace('#',''); }).filter(Boolean);
+  var sections = sectionIds.map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 44;
+  if('IntersectionObserver' in window && sections.length){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          navLinks.forEach(function(l){ l.classList.remove('active'); });
+          var active = document.querySelector('.nav-link[href="#'+entry.target.id+'"]');
+          if(active) active.classList.add('active');
+        }
+      });
+    },{ rootMargin:'-44px 0px -60% 0px', threshold:0 });
+    sections.forEach(function(s){ observer.observe(s); });
+  }
+  if(navLinks.length) navLinks[0].classList.add('active');
+
+  /* Back-to-top */
+  var btn = document.getElementById('backToTop');
+  if(btn){
+    window.addEventListener('scroll', function(){
+      btn.classList.toggle('visible', window.scrollY > 300);
+    },{ passive:true });
+  }
+
+  /* Expandable panels */
+  document.querySelectorAll('.btn-expand').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var panel = document.getElementById(btn.getAttribute('aria-controls'));
+      if(!panel) return;
+      var isOpen = panel.classList.contains('open');
+      panel.classList.toggle('open', !isOpen);
+      btn.classList.toggle('open', !isOpen);
+      btn.querySelector('.expand-text').textContent = isOpen ? 'Read More' : 'Read Less';
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      /* Also mark the parent article so we can reorder teaser/body/footer in browsers without :has() */
+      var article = panel.closest('article, .pid-featured, .aipom-card, .stes-card');
+      if(article) article.classList.toggle('is-expanded', !isOpen);
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
